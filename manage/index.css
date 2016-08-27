@@ -1,0 +1,44 @@
+.toolbar {
+  background-color: #FF5722;
+  color: #FFF;
+  padding: 10px;
+  flex: 0 0 auto;
+}
+.toolbar input {
+  border: 0;
+}
+.toolbar-icon {
+  padding: 5px;
+  line-height: 0;
+  cursor: pointer;
+}
+.icon-button {
+  cursor: pointer;
+}
+.playlist-list {}
+.playlist-item {
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 10px 0;
+}
+.playlist-title {
+  color: #FF5722;
+}
+.item-item {
+  margin: 5px 0;
+}
+.item-item.is-playing .item-type {
+  color: #FF5722;
+}
+.item-hearing {
+  display: none;
+}
+.item-item.is-playing .item-hearing {
+  display: block;
+  color: #FF5722;
+}
+.metadata {
+  background-color: #FF5722;
+  color: #FFF;
+  padding: 10px 20px;
+}

@@ -1,0 +1,8 @@
+:root {
+  font-family: "Open Sans", sans-serif;
+  letter-spacing: 1.5px;
+}
+.disable-selection {
+  user-select: none;
+  -webkit-user-select: none;
+}

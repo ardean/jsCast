@@ -1,0 +1,30 @@
+{
+  "name": "jscast",
+  "version": "0.1.0",
+  "description": "A SHOUTcast Server written in JavaScript",
+  "dependencies": {
+    "async": "^2.0.1",
+    "commander": "^2.9.0",
+    "destroy": "^1.0.4",
+    "express": "^4.14.0",
+    "fluent-ffmpeg": "^2.1.0",
+    "geoip-lite": "^1.1.8",
+    "ip": "^1.1.3",
+    "mkdirp": "^0.5.1",
+    "shortid": "^2.2.6",
+    "sm-parsers": "^0.1.2",
+    "socket.io": "^1.4.8",
+    "ytdl-core": "^0.7.17"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.13.2"
+  },
+  "scripts": {
+    "start": "babel-node demo --presets es2015",
+    "build": "babel src --out-dir build --presets es2015"
+  },
+  "bin": {
+    "jscast-server": "./bin/index.js"
+  }
+}
