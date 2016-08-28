@@ -78,7 +78,7 @@ Built-in item types:
 - **YouTube** fetches the audio data and info from YouTube using an *url* option
 - Use **Stream** to hand over a Readable Stream object with the *stream* option
 
-[more](#/Custom Items) item types
+[more](#custom-items) item types
 
 ## Storage Types
 
@@ -87,7 +87,7 @@ Built-in storage types:
 - JSON creates a folder with a json file per playlist, filename is the playlist id
 - Memory stores playlists in memory, so **changes will be lost** on shutdown
 
-If thats not enough, you can create your [own one](#/Custom Storages)
+If thats not enough, you can create [your own one](#custom-storages)
 
 ## Examples
 
@@ -152,7 +152,7 @@ new Server({
 
 ### Custom Storages
 
-You can use the built-in [storage types](#/API) or create your own one:
+You can use the built-in [storage types](#api) or create your own one:
 
 ```js
 var fs = require("fs");
