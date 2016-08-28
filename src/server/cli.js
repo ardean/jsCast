@@ -10,8 +10,8 @@ const storageTypeNames = Storage.getTypeNames();
 program
   .version(pkg.version)
   .option("-p, --port [port]", "sets server port", parseInt)
-  .option("-c, --country [country]", "allow specific country only e.g. US")
-  .option("--storageType [storageType]", "use storage type, builtin types: " + storageTypeNames.join(", "))
+  .option("-c, --country [country]", "only allow specific country e.g. US")
+  .option("--storageType [storageType]", "use storage type, built-in types: " + storageTypeNames.join(", "))
   .parse(process.argv);
 
 new Server({

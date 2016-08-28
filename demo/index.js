@@ -11,19 +11,6 @@ const mapYouTube = function (url) {
   };
 };
 
-const germanPlaylist = [
-  "https://www.youtube.com/watch?v=6S1Yupk77pA",
-  "https://www.youtube.com/watch?v=4rRYqtehPk8",
-  "https://www.youtube.com/watch?v=RZ6O4yvgQ3U",
-  "https://www.youtube.com/watch?v=ntoqc6hFkhE",
-  "https://www.youtube.com/watch?v=LUlZ5n0cyak",
-  "https://www.youtube.com/watch?v=mJbJDqEJ6Iw",
-  "https://www.youtube.com/watch?v=BoX5U8rAsNA",
-  "https://www.youtube.com/watch?v=8nSPcxPR-6I",
-  "https://www.youtube.com/watch?v=uDe-EdAEKvw",
-  "https://www.youtube.com/watch?v=YO1GBsuzTWU"
-].map(mapYouTube);
-
 const yogscastPlaylist = [
   "https://www.youtube.com/watch?v=99dM8__wphY",
   "https://www.youtube.com/watch?v=gqELqRCnW6g",
@@ -39,11 +26,10 @@ const suicidePlaylist = [
 ].map(mapYouTube);
 
 new Server({
-  storageType: "JSON",
+  storageType: "Memory",
   playlists: [
-    // yogscastPlaylist,
-    // germanPlaylist,
-    // suicidePlaylist
+    yogscastPlaylist,
+    suicidePlaylist
   ],
   allow: (client) => {
     if (ip.isEqual(client.ip, "127.0.0.1") || client.ip === "::1") return true;

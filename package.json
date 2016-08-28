@@ -1,7 +1,12 @@
 {
   "name": "jscast",
-  "version": "0.1.0",
-  "description": "A SHOUTcast Server written in JavaScript",
+  "version": "0.1.1",
+  "description": "A SHOUTcast Server/Library written in JavaScript",
+  "author": "BigTeri",
+  "license": "MIT",
+  "repository": "https://github.com/BigTeri/jscast",
+  "bugs": "https://github.com/BigTeri/jscast/issues",
+  "main": "build/index.js",
   "dependencies": {
     "async": "^2.0.1",
     "commander": "^2.9.0",

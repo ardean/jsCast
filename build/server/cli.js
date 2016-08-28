@@ -28,7 +28,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var storageTypeNames = _storage2.default.getTypeNames();
 
-_commander2.default.version(_package2.default.version).option("-p, --port [port]", "sets server port", parseInt).option("-c, --country [country]", "allow specific country only e.g. US").option("--storageType [storageType]", "use storage type, builtin types: " + storageTypeNames.join(", ")).parse(process.argv);
+_commander2.default.version(_package2.default.version).option("-p, --port [port]", "sets server port", parseInt).option("-c, --country [country]", "only allow specific country e.g. US").option("--storageType [storageType]", "use storage type, built-in types: " + storageTypeNames.join(", ")).parse(process.argv);
 
 new _2.default({
   storageType: _commander2.default.storageType,

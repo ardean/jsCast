@@ -12,7 +12,7 @@ import Client from "./client";
 import clientMiddleware from "./client-middleware";
 import allowMiddleware from "./client-allow-middleware";
 
-const jscastDescription = "jscast - A SHOUTcast Server written in JavaScript";
+const jscastDescription = "jscast - A SHOUTcast Server/Library written in JavaScript";
 const jscastUrl = "https://github.com/BigTeri/jscast";
 
 export default class Server extends EventEmitter {
