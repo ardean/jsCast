@@ -128,10 +128,10 @@ var Server = function (_EventEmitter) {
     _this.app.get("/", function (req, res) {
       return _this.clientConnected(new _client2.default(req, res));
     });
-    _this.app.use(_path2.default.join("/", _this.staticPath), _this.webRouter);
-    _this.webRouter.use(_express2.default.static(_path2.default.join(__dirname, "../../", _this.staticPath)));
+    _this.app.use(fixWindowsPath(_path2.default.join("/", _this.staticPath)), _this.webRouter);
+    _this.webRouter.use(_express2.default.static(fixWindowsPath(_path2.default.join(__dirname, "../../", _this.staticPath))));
     _this.io = (0, _socket2.default)(_this.http, {
-      path: _path2.default.join("/", _this.staticPath, "/sockets")
+      path: fixWindowsPath(_path2.default.join("/", _this.staticPath, "/sockets"))
     });
 
     _this.socketClients = [];
@@ -244,3 +244,8 @@ var Server = function (_EventEmitter) {
 }(_events.EventEmitter);
 
 exports.default = Server;
+
+
+function fixWindowsPath(url) {
+  return url.replace(/\\/g, "/");
+}

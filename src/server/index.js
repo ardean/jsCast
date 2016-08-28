@@ -80,10 +80,10 @@ export default class Server extends EventEmitter {
       this.emit("clientRejected", client);
     }));
     this.app.get("/", (req, res) => this.clientConnected(new Client(req, res)));
-    this.app.use(path.join("/", this.staticPath), this.webRouter);
-    this.webRouter.use(express.static(path.join(__dirname, "../../", this.staticPath)));
+    this.app.use(fixWindowsPath(path.join("/", this.staticPath)), this.webRouter);
+    this.webRouter.use(express.static(fixWindowsPath(path.join(__dirname, "../../", this.staticPath))));
     this.io = SocketIOServer(this.http, {
-      path: path.join("/", this.staticPath, "/sockets")
+      path: fixWindowsPath(path.join("/", this.staticPath, "/sockets"))
     });
 
     this.socketClients = [];
@@ -182,4 +182,8 @@ export default class Server extends EventEmitter {
       "icy-metaint": sendMetadata ? this.bufferSize.toString() : "0"
     };
   }
+}
+
+function fixWindowsPath(url) {
+  return url.replace(/\\/g, "/");
 }
