@@ -93,7 +93,7 @@ If thats not enough, you can create [your own one](#custom-storages)
 
 ### Custom Items
 
-jscast has playlists with typed items.
+jscast has playlists with [typed items](#item-types).
 You can easily add your own item type:
 
 ```js
@@ -152,7 +152,7 @@ new Server({
 
 ### Custom Storages
 
-You can use the built-in [storage types](#api) or create your own one:
+You can use the built-in [storage types](#storage-types) or create your own one:
 
 ```js
 var fs = require("fs");
