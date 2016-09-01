@@ -3,46 +3,11 @@
 
 A SHOUTcast Server/Library written in JavaScript
 
-## Installation
-
-As dependency:
-
-```sh
-$ npm install jscast
-```
-
-For developing forks:
-
-```sh
-$ git clone https://github.com/BigTeri/jscast
-```
-
-```sh
-$ cd jscast
-$ npm i
-```
-
-```sh
-$ npm start
-```
-
-For minimalists:
-
-```sh
-$ npm i -g jscast
-```
-
-```sh
-$ jscast-server
-```
-
-### Prerequisites
-
-jscast uses [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg#prerequisites) so ffmpeg **needs** to be installed on your system.
+![jscast - manage](/docs/images/jscast-manage.png)
 
 ## Quick Start
 
-### Using cli
+### Using CLI
 
 Install jscast globally:
 
@@ -55,28 +20,67 @@ Use the new command to start a Server:
 ```sh
 $ jscast-server
 ```
-choose a different port with *-p 8888*
+choose a different port with `-p 8888`
 
-### Using script
+### Using Script
 
 ```js
 var Server = require("jscast").Server;
 
 new Server().on("play", function (item, metadata) {
   console.log("playing " + metadata.options.StreamTitle);
-}).start(8000, function (server) {
-  console.log("jscast server is running on http://localhost:" + server.port);
-  console.log("go to http://localhost:" + server.port + "/manage to manage your playlists");
+}).listen(8000, function (server) {
+  console.log("jscast server is running");
+  console.log("listen on http://localhost:" + server.port + server.icyServerRootPath);
+  console.log("manage on http://localhost:" + server.port + server.manageRootPath + " your playlists and items");
 });
 ```
+
+## Prerequisites
+
+first of all install [NodeJS](https://nodejs.org/), jscast is based on it.
+
+jscast uses [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg#prerequisites) as dependency so ffmpeg **needs** to be installed on your system.
+
+## Installation
+
+As dependency:
+
+```sh
+$ npm install jscast
+```
+
+Play around and contribute to the project:
+
+```sh
+$ git clone https://github.com/BigTeri/jscast
+$ cd jscast
+$ npm i
+$ npm start
+```
+
+## Manage
+
+**Manage** is a `webapp` to control jscast *playlists* and *items*. the route is `/manage` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with `manage`. There is also a `player` *(using a audio tag)* embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
+
+## IcyServer
+
+The **IcyServer**'s task is to send the `SHOUTcast data` (received from the *Station*) to the `clients`. the route is `/` by default.
+
+## Server
+
+The jscast **Server** combines `Manage` and the `IcyServer` to a simple to use application.
+
+## Station
+The **Station** is the `core Class` which *controls* the `Stream` with his `data` and whatever *currently* is `playing`.
 
 ## Item Types
 
 Built-in item types:
 
-- **File** gets audio files from the filesystem using the *filename* option
-- **YouTube** fetches the audio data and info from YouTube using an *url* option
-- Use **Stream** to hand over a Readable Stream object with the *stream* option
+- **File** gets audio files from the filesystem using the `filename` option
+- **YouTube** fetches the audio data and info from YouTube using an `url` option
+- Use **Stream** to hand over a Readable Stream object with the `stream` option
 
 [more](#custom-items) item types
 
@@ -84,8 +88,8 @@ Built-in item types:
 
 Built-in storage types:
 
-- JSON creates a folder with a json file per playlist, filename is the playlist id
-- Memory stores playlists in memory, so **changes will be lost** on shutdown
+- **JSON** creates a folder with a json file per playlist, filename is the `playlist id`
+- **Memory** stores playlists in memory, so *`changes will be lost`* on shutdown
 
 If thats not enough, you can create [your own one](#custom-storages)
 
@@ -147,7 +151,7 @@ new Server({
       filename: "./myTrack.mp3"
     }
   }]
-}).start();
+}).listen();
 ```
 
 ### Custom Storages
@@ -198,7 +202,7 @@ Storage.registerType("MyStorage", new MyStorageType());
 
 new Server({
   storageType: "MyStorage"
-}).start();
+}).listen();
 ```
 
 ## API

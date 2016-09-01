@@ -37,12 +37,12 @@ new Server({
   console.log(`playing ${metadata.options.StreamTitle}`);
 }).on("clientRejected", (client) => {
   console.log(`client ${client.ip} rejected`);
-}).on("clientConnect", (client) => {
+}).on("icyServerClientConnect", (client) => {
   console.log(`client ${client.ip} connected`);
-}).on("clientDisconnect", (client) => {
+}).on("icyServerClientDisconnect", (client) => {
   console.log(`client ${client.ip} disconnected`);
-}).start(program.port, (server) => {
+}).listen(program.port, (server) => {
   console.log(`jscast server is running`);
-  console.log(`listen on http://localhost:${server.port}/`);
-  console.log(`manage on http://localhost:${server.port}/manage`);
+  console.log(`listen on http://localhost:${server.port}${server.icyServerRootPath}`);
+  console.log(`manage on http://localhost:${server.port}${server.manageRootPath}`);
 });

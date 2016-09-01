@@ -49,6 +49,51 @@ var Playlist = function (_EventEmitter) {
       return item;
     }
   }, {
+    key: "removeItem",
+    value: function removeItem(id) {
+      var item = this.findItemById(id);
+      if (item) {
+        var index = this.items.indexOf(item);
+        if (index > -1) {
+          this.items.splice(index, 1);
+          return item;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: "findItemById",
+    value: function findItemById(id) {
+      return this.items.find(function (item) {
+        return item._id === id;
+      });
+    }
+  }, {
+    key: "replaceItemByItemId",
+    value: function replaceItemByItemId(itemId) {
+      var item = this.findItemById(itemId);
+      return this.replaceItem(item);
+    }
+  }, {
+    key: "replaceItem",
+    value: function replaceItem(item) {
+      if (!item) return false;
+      this.loadItem(item, "replace");
+      return true;
+    }
+  }, {
+    key: "loadItem",
+    value: function loadItem(item, eventName) {
+      var _this2 = this;
+
+      item.load(function (err, stream, metadata, options) {
+        _this2.emit(eventName, err, stream, metadata, item, options);
+      });
+    }
+  }, {
     key: "playNext",
     value: function playNext() {
       return this.next("play");
@@ -61,14 +106,10 @@ var Playlist = function (_EventEmitter) {
   }, {
     key: "next",
     value: function next(eventName) {
-      var _this2 = this;
-
       this.setNextIndex();
       var item = this.items[this.index];
       if (!item) return false;
-      item.load(function (err, stream, metadata, options) {
-        _this2.emit(eventName, err, stream, metadata, item, options);
-      });
+      this.loadItem(item, eventName);
       return true;
     }
   }, {

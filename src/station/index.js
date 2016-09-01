@@ -6,6 +6,7 @@ import Stream from "../stream";
 import Storage from "../storage";
 import Playlist from "../playlist";
 import Metadata from "./metadata";
+import VirtualPlayer from "./virtual-player";
 
 export default class Station extends EventEmitter {
   constructor(options) {
@@ -20,6 +21,7 @@ export default class Station extends EventEmitter {
     this.storageType = options.storageType || "JSON";
 
     this.storage = new Storage(this.storageType);
+    this.virtualPlayer = new VirtualPlayer();
 
     this.itemId = null;
     this.item = null;
@@ -90,7 +92,7 @@ export default class Station extends EventEmitter {
         // TODO: remove item if err
         if (err) return console.log(err);
 
-        this.emit("itemCreated", item, playlist._id);
+        this.emit("itemCreated", item, playlist);
 
         if (wasPlaylistEmpty) {
           this.playNext();
@@ -99,6 +101,55 @@ export default class Station extends EventEmitter {
     } else {
       // TODO: create playlist with item in it
       console.log("NYI");
+    }
+  }
+
+  removeItem(id, playlistId) {
+    const playlist = this.findPlaylistById(playlistId);
+    if (playlist) {
+      const removed = playlist.removeItem(id);
+      const itemIndex = playlist.items.indexOf(removed);
+      if (removed) {
+        this.storage.update(playlist, (err) => {
+          if (err) {
+            playlist.items.splice(itemIndex, 0, removed);
+            return console.error(err);
+          }
+
+          this.emit("itemRemoved", removed, playlist);
+
+          if (removed._id === this.itemId) {
+            this.replaceNext();
+          }
+        });
+      } else {
+        console.log("item to remove not found");
+      }
+    } else {
+      console.log("playlist not found");
+    }
+  }
+
+  removePlaylist(playlistId) {
+    const playlist = this.findPlaylistById(playlistId);
+    if (playlist) {
+      const playlistIndex = this.playlists.indexOf(playlist);
+      this.playlists.splice(playlistIndex, 1);
+      this.storage.remove(playlist._id, (err) => {
+        if (err) {
+          this.playlists.splice(playlistIndex, 0, playlist);
+          return console.error(err);
+        }
+
+        this.emit("playlistRemoved", playlist);
+
+        if (playlist._id === this.playlist._id) {
+          this.playlist = null;
+          this.replaceNext();
+        }
+      });
+    } else {
+      console.log("playlist to remove not found");
     }
   }
 
@@ -111,7 +162,31 @@ export default class Station extends EventEmitter {
     }
   }
 
+  replacePlaylistByPlaylistId(playlistId) {
+    const playlist = this.findPlaylistById(playlistId);
+    if (playlist) this.replacePlaylist(playlist);
+  }
+
+  replacePlaylistByPlaylistIdAndItemId(playlistId, itemId) {
+    const playlist = this.findPlaylistById(playlistId);
+    if (playlist) {
+      this.replacePlaylistAndItemId(playlist, itemId);
+    }
+  }
+
   replacePlaylist(playlist) {
+    this.changePlaylist(playlist);
+    this.replaceNext();
+  }
+
+  replacePlaylistAndItemId(playlist, itemId) {
+    this.changePlaylist(playlist);
+    this.replaceItemId(itemId);
+  }
+
+  changePlaylist(playlist) {
+    if (this.playlist && this.playlist._id === playlist._id) return;
+
     if (this.playlist) {
       this.playlist.removeListener("play", this.playlistPlay);
       this.playlist.removeListener("replace", this.playlistReplace);
@@ -119,12 +194,6 @@ export default class Station extends EventEmitter {
     this.playlist = playlist;
     this.playlist.on("play", this.playlistPlay);
     this.playlist.on("replace", this.playlistReplace);
-    this.replaceNext();
-  }
-
-  replacePlaylistByPlaylistId(playlistId) {
-    const playlist = this.findPlaylistById(playlistId);
-    if (playlist) this.replacePlaylist(playlist);
   }
 
   findPlaylistById(id) {
@@ -144,6 +213,17 @@ export default class Station extends EventEmitter {
   replaceNext() {
     if (this.playlist) {
       this.handleNothingToPlay(!this.playlist.replaceNext());
+    } else {
+      this.handleNoPlaylist();
+    }
+  }
+
+  replaceItemId(itemId) {
+    if (this.playlist) {
+      const canPlay = !this.playlist.replaceItemByItemId(itemId);
+      if (!canPlay) {
+        this.replaceNext();
+      }
     } else {
       this.handleNoPlaylist();
     }

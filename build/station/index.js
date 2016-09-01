@@ -28,6 +28,10 @@ var _metadata = require("./metadata");
 
 var _metadata2 = _interopRequireDefault(_metadata);
 
+var _virtualPlayer = require("./virtual-player");
+
+var _virtualPlayer2 = _interopRequireDefault(_virtualPlayer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53,6 +57,7 @@ var Station = function (_EventEmitter) {
     _this.storageType = options.storageType || "JSON";
 
     _this.storage = new _storage2.default(_this.storageType);
+    _this.virtualPlayer = new _virtualPlayer2.default();
 
     _this.itemId = null;
     _this.item = null;
@@ -139,7 +144,7 @@ var Station = function (_EventEmitter) {
             // TODO: remove item if err
             if (err) return console.log(err);
 
-            _this4.emit("itemCreated", item, playlist._id);
+            _this4.emit("itemCreated", item, playlist);
 
             if (wasPlaylistEmpty) {
               _this4.playNext();
@@ -149,6 +154,65 @@ var Station = function (_EventEmitter) {
       } else {
         // TODO: create playlist with item in it
         console.log("NYI");
+      }
+    }
+  }, {
+    key: "removeItem",
+    value: function removeItem(id, playlistId) {
+      var _this5 = this;
+
+      var playlist = this.findPlaylistById(playlistId);
+      if (playlist) {
+        (function () {
+          var removed = playlist.removeItem(id);
+          var itemIndex = playlist.items.indexOf(removed);
+          if (removed) {
+            _this5.storage.update(playlist, function (err) {
+              if (err) {
+                playlist.items.splice(itemIndex, 0, removed);
+                return console.error(err);
+              }
+
+              _this5.emit("itemRemoved", removed, playlist);
+
+              if (removed._id === _this5.itemId) {
+                _this5.replaceNext();
+              }
+            });
+          } else {
+            console.log("item to remove not found");
+          }
+        })();
+      } else {
+        console.log("playlist not found");
+      }
+    }
+  }, {
+    key: "removePlaylist",
+    value: function removePlaylist(playlistId) {
+      var _this6 = this;
+
+      var playlist = this.findPlaylistById(playlistId);
+      if (playlist) {
+        (function () {
+          var playlistIndex = _this6.playlists.indexOf(playlist);
+          _this6.playlists.splice(playlistIndex, 1);
+          _this6.storage.remove(playlist._id, function (err) {
+            if (err) {
+              _this6.playlists.splice(playlistIndex, 0, playlist);
+              return console.error(err);
+            }
+
+            _this6.emit("playlistRemoved", playlist);
+
+            if (playlist._id === _this6.playlist._id) {
+              _this6.playlist = null;
+              _this6.replaceNext();
+            }
+          });
+        })();
+      } else {
+        console.log("playlist to remove not found");
       }
     }
   }, {
@@ -162,8 +226,36 @@ var Station = function (_EventEmitter) {
       }
     }
   }, {
+    key: "replacePlaylistByPlaylistId",
+    value: function replacePlaylistByPlaylistId(playlistId) {
+      var playlist = this.findPlaylistById(playlistId);
+      if (playlist) this.replacePlaylist(playlist);
+    }
+  }, {
+    key: "replacePlaylistByPlaylistIdAndItemId",
+    value: function replacePlaylistByPlaylistIdAndItemId(playlistId, itemId) {
+      var playlist = this.findPlaylistById(playlistId);
+      if (playlist) {
+        this.replacePlaylistAndItemId(playlist, itemId);
+      }
+    }
+  }, {
     key: "replacePlaylist",
     value: function replacePlaylist(playlist) {
+      this.changePlaylist(playlist);
+      this.replaceNext();
+    }
+  }, {
+    key: "replacePlaylistAndItemId",
+    value: function replacePlaylistAndItemId(playlist, itemId) {
+      this.changePlaylist(playlist);
+      this.replaceItemId(itemId);
+    }
+  }, {
+    key: "changePlaylist",
+    value: function changePlaylist(playlist) {
+      if (this.playlist && this.playlist._id === playlist._id) return;
+
       if (this.playlist) {
         this.playlist.removeListener("play", this.playlistPlay);
         this.playlist.removeListener("replace", this.playlistReplace);
@@ -171,13 +263,6 @@ var Station = function (_EventEmitter) {
       this.playlist = playlist;
       this.playlist.on("play", this.playlistPlay);
       this.playlist.on("replace", this.playlistReplace);
-      this.replaceNext();
-    }
-  }, {
-    key: "replacePlaylistByPlaylistId",
-    value: function replacePlaylistByPlaylistId(playlistId) {
-      var playlist = this.findPlaylistById(playlistId);
-      if (playlist) this.replacePlaylist(playlist);
     }
   }, {
     key: "findPlaylistById",
@@ -200,6 +285,18 @@ var Station = function (_EventEmitter) {
     value: function replaceNext() {
       if (this.playlist) {
         this.handleNothingToPlay(!this.playlist.replaceNext());
+      } else {
+        this.handleNoPlaylist();
+      }
+    }
+  }, {
+    key: "replaceItemId",
+    value: function replaceItemId(itemId) {
+      if (this.playlist) {
+        var canPlay = !this.playlist.replaceItemByItemId(itemId);
+        if (!canPlay) {
+          this.replaceNext();
+        }
       } else {
         this.handleNoPlaylist();
       }
@@ -259,11 +356,11 @@ var Station = function (_EventEmitter) {
   }, {
     key: "handleStreamError",
     value: function handleStreamError(stream) {
-      var _this5 = this;
+      var _this7 = this;
 
       return stream.once("error", function (err) {
         stream.destroy();
-        _this5.onPlayError(err);
+        _this7.onPlayError(err);
       });
     }
   }, {

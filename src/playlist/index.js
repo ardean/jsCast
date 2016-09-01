@@ -20,6 +20,42 @@ export default class Playlist extends EventEmitter {
     return item;
   }
 
+  removeItem(id) {
+    const item = this.findItemById(id);
+    if (item) {
+      const index = this.items.indexOf(item);
+      if (index > -1) {
+        this.items.splice(index, 1);
+        return item;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  findItemById(id) {
+    return this.items.find((item) => item._id === id);
+  }
+
+  replaceItemByItemId(itemId) {
+    const item = this.findItemById(itemId);
+    return this.replaceItem(item);
+  }
+
+  replaceItem(item) {
+    if (!item) return false;
+    this.loadItem(item, "replace");
+    return true;
+  }
+
+  loadItem(item, eventName) {
+    item.load((err, stream, metadata, options) => {
+      this.emit(eventName, err, stream, metadata, item, options);
+    });
+  }
+
   playNext() {
     return this.next("play");
   }
@@ -32,9 +68,7 @@ export default class Playlist extends EventEmitter {
     this.setNextIndex();
     const item = this.items[this.index];
     if (!item) return false;
-    item.load((err, stream, metadata, options) => {
-      this.emit(eventName, err, stream, metadata, item, options);
-    });
+    this.loadItem(item, eventName);
     return true;
   }
 

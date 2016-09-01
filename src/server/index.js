@@ -4,142 +4,63 @@ import {
 import {
   Server as HttpServer
 } from "http";
-import path from "path";
 import express from "express";
-import SocketIOServer from "socket.io";
 import Station from "../station";
-import Client from "./client";
-import clientMiddleware from "./client-middleware";
-import allowMiddleware from "./client-allow-middleware";
-
-const jscastDescription = "jscast - A SHOUTcast Server/Library written in JavaScript";
-const jscastUrl = "https://github.com/BigTeri/jscast";
+import IcyServer from "../icy-server";
+import Manage from "../manage";
+import clientMiddleware from "../client/client-middleware";
+import allowMiddleware from "../client/client-allow-middleware";
 
 export default class Server extends EventEmitter {
   constructor(options) {
     super();
 
-    options = options || {};
-    this.name = options.name || jscastDescription;
-    this.genre = options.genre || "Music";
-    this.url = options.url || jscastUrl;
-    this.isPublic = options.isPublic || false;
-    this.bitrate = options.bitrate || 128;
-    this.storageType = options.storageType || null;
-    this.bufferSize = options.bufferSize || 8192;
-    this.skipMetadata = options.skipMetadata || false;
-    this.staticPath = options.staticPath || "./manage";
+    this.icyServerRootPath = options.icyServerRootPath || "/";
+    this.manageRootPath = options.manageRootPath || "/manage";
+    this.stationOptions = options.stationOptions || {};
+    this.station = options.station || new Station(this.stationOptions);
+    this.app = options.app || express();
+    this.socket = options.socket || new HttpServer(this.app);
     this.port = options.port || 8000;
     this.allow = options.allow || function () {
       return true;
     };
 
-    this.station = new Station({
-      postProcessingBitRate: this.bitrate,
-      storageType: this.storageType,
-      bufferSize: this.bufferSize,
-      dataInterval: options.dataInterval,
-      prebufferSize: options.prebufferSize,
-      skipFilePlugin: options.skipFilePlugin,
-      skipStreamPlugin: options.skipStreamPlugin,
-      skipYouTubePlugin: options.skipYouTubePlugin,
-      playlists: options.playlists
-    });
-
     this.station.on("error", (err) => this.emit("error", err));
     this.station.on("play", (item, metadata) => this.emit("play", item, metadata));
     this.station.on("nothingToPlay", (playlist) => this.emit("nothingToPlay", playlist));
-    this.station.on("data", (data, metadata) => {
-      if (data) {
-        let metadataBuffer = data;
-        if (!this.skipMetadata) {
-          metadataBuffer = metadata.createCombinedBuffer(data);
-        }
-        this.clients.forEach((client) => {
-          const sendMetadata = !this.skipMetadata && client.wantsMetadata;
-          if (sendMetadata) {
-            client.write(metadataBuffer);
-          } else {
-            client.write(data);
-          }
-        });
-      }
-    });
 
-    this.clients = [];
-    this.app = express();
-    this.http = new HttpServer(this.app);
-    this.webRouter = new express.Router();
+    // TODO: universal (client) middlewares
     this.app.use((req, res, next) => {
-      res.setHeader("x-powered-by", "jscast " + jscastUrl);
+      res.setHeader("x-powered-by", "jscast https://github.com/BigTeri/jscast");
       next();
     });
-    // TODO: allow for socket.io
     this.app.use(clientMiddleware);
     this.app.use(allowMiddleware(this.allow, (client) => {
       this.emit("clientRejected", client);
     }));
-    this.app.get("/", (req, res) => this.clientConnected(new Client(req, res)));
-    this.app.use(fixWindowsPath(path.join("/", this.staticPath)), this.webRouter);
-    this.webRouter.use(express.static(fixWindowsPath(path.join(__dirname, "../../", this.staticPath))));
-    this.io = SocketIOServer(this.http, {
-      path: fixWindowsPath(path.join("/", this.staticPath, "/sockets"))
-    });
 
-    this.socketClients = [];
-    this.io.on("connection", (socket) => {
-      this.socketClients.push(socket);
+    this.icyServerOptions = options.icyServerOptions || {};
+    this.icyServerOptions.rootPath = this.icyServerOptions.rootPath || this.icyServerRootPath;
+    this.icyServerOptions.socket = this.icyServerOptions.socket || this.socket;
+    this.icyServerOptions.app = this.icyServerOptions.app || this.app;
+    this.icyServerOptions.station = this.icyServerOptions.station || this.station;
+    this.icyServer = options.icyServer || new IcyServer(this.icyServerOptions);
+    this.icyServer.on("clientConnect", (client) => this.emit("icyServerClientConnect", client));
+    this.icyServer.on("clientDisconnect", (client) => this.emit("icyServerClientDisconnect", client));
 
-      socket.once("disconnect", () => {
-        this.socketClients.splice(this.socketClients.indexOf(socket), 1);
-      });
-
-      socket.on("fetch", () => {
-        socket.emit("info", {
-          item: this.station.item,
-          metadata: this.station.metadata,
-          playlists: this.station.playlists
-        });
-      });
-
-      socket.on("next", () => {
-        this.station.replaceNext();
-      });
-
-      socket.on("addPlaylist", () => {
-        this.station.addPlaylist();
-      });
-
-      socket.on("playPlaylist", (playlistId) => {
-        this.station.replacePlaylistByPlaylistId(playlistId);
-      });
-
-      socket.on("addItem", (item) => {
-        // TODO: item validation
-        this.station.addItem(item);
-      });
-    });
-
-    this.station.on("play", (item, metadata) => {
-      this.socketClients.forEach((socket) => {
-        socket.emit("playing", item, metadata);
-      });
-    });
-
-    this.station.on("playlistCreated", (playlist) => {
-      this.socketClients.forEach((socket) => {
-        socket.emit("playlistCreated", playlist);
-      });
-    });
-
-    this.station.on("itemCreated", (item, playlistId) => {
-      this.socketClients.forEach((socket) => {
-        socket.emit("itemCreated", item, playlistId);
-      });
-    });
+    this.manageOptions = options.manageOptions || {};
+    this.manageOptions.rootPath = this.manageOptions.rootPath || this.manageRootPath;
+    this.manageOptions.playerSourcePath = this.manageOptions.playerSourcePath || this.icyServerRootPath;
+    this.manageOptions.socket = this.manageOptions.socket || this.socket;
+    this.manageOptions.app = this.manageOptions.app || this.app;
+    this.manageOptions.station = this.manageOptions.station || this.station;
+    this.manage = options.manage || new Manage(this.manageOptions);
+    this.manage.on("webSocketClientConnect", (client) => this.emit("manageWebSocketClientConnect", client));
+    this.manage.on("webSocketClientDisconnect", (client) => this.emit("manageWebSocketClientDisconnect", client));
   }
 
-  start(port, done) {
+  listen(port, done) {
     if (typeof port === "function") {
       done = port;
       port = null;
@@ -152,38 +73,8 @@ export default class Server extends EventEmitter {
       done && done(this);
     });
 
-    this.http.listen(this.port, () => {
+    this.socket.listen(this.port, () => {
       this.emit("start");
     });
   }
-
-  clientConnected(client) {
-    this.clients.push(client);
-    this.emit("clientConnect", client);
-
-    client.res.writeHead(200, this.getHeaders(client));
-    client.req.once("close", this.clientDisconnected.bind(this, client));
-  }
-
-  clientDisconnected(client) {
-    this.emit("clientDisconnect", client);
-    this.clients.splice(this.clients.indexOf(client), 1);
-  }
-
-  getHeaders(client) {
-    const sendMetadata = !this.skipMetadata && client.wantsMetadata;
-    return {
-      "Content-Type": "audio/mpeg",
-      "icy-name": this.name,
-      "icy-genre": this.genre,
-      "icy-url": this.url,
-      "icy-pub": this.isPublic ? "1" : "0",
-      "icy-br": this.bitrate.toString(),
-      "icy-metaint": sendMetadata ? this.bufferSize.toString() : "0"
-    };
-  }
-}
-
-function fixWindowsPath(url) {
-  return url.replace(/\\/g, "/");
 }

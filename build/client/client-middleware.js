@@ -5,12 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (req, res, next) {
-  req.jscastClient = new _client2.default(req, res);
+  req.jscastClient = new _2.default(req, res);
   next();
 };
 
-var _client = require("./client");
+var _ = require("./");
 
-var _client2 = _interopRequireDefault(_client);
+var _2 = _interopRequireDefault(_);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

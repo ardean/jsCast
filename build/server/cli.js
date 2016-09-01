@@ -53,12 +53,12 @@ new _2.default({
   console.log("playing " + metadata.options.StreamTitle);
 }).on("clientRejected", function (client) {
   console.log("client " + client.ip + " rejected");
-}).on("clientConnect", function (client) {
+}).on("icyServerClientConnect", function (client) {
   console.log("client " + client.ip + " connected");
-}).on("clientDisconnect", function (client) {
+}).on("icyServerClientDisconnect", function (client) {
   console.log("client " + client.ip + " disconnected");
-}).start(_commander2.default.port, function (server) {
+}).listen(_commander2.default.port, function (server) {
   console.log("jscast server is running");
-  console.log("listen on http://localhost:" + server.port + "/");
-  console.log("manage on http://localhost:" + server.port + "/manage");
+  console.log("listen on http://localhost:" + server.port + server.icyServerRootPath);
+  console.log("manage on http://localhost:" + server.port + server.manageRootPath);
 });

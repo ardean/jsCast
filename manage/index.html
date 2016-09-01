@@ -3,15 +3,22 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="msapplication-tap-highlight" content="no">
   <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
   <meta name="theme-color" content="#FF5722">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#FF5722">
   <title>jscast - manage</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js" charset="utf-8"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js" charset="utf-8"></script>
   <script src="./sockets/socket.io.js" charset="utf-8"></script>
   <script src="./array-find.js" charset="utf-8"></script>
+  <script src="./models/item.js" charset="utf-8"></script>
+  <script src="./models/playlist.js" charset="utf-8"></script>
+  <script src="./bindings/player.js" charset="utf-8"></script>
+  <script src="./local-settings.js" charset="utf-8"></script>
   <script src="./index.js" charset="utf-8"></script>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -23,41 +30,47 @@
 
 <body class="layout-vertical">
   <div class="head">
-    <h1 class="head-title">jscast</h1>
-  </div>
-  <div class="toolbar layout-horizontal">
-    <div class="toolbar-icon disable-selection" data-bind="click: addPlaylist">
-      <i class="material-icons">playlist_add</i>
-    </div>
-    <div class="toolbar-icon disable-selection" data-bind="click: next">
-      <i class="material-icons">skip_next</i>
-    </div>
-    <input type="url" class="flex" placeholder="YouTube Url" data-bind="value: itemUrl">
-    <div class="toolbar-icon disable-selection" data-bind="click: addItem">
-      <i class="material-icons">add</i>
+    <h1 class="head-title">jscast - manage</h1>
+    <div class="toolbar layout-horizontal">
+      <div class="toolbar-icon disable-selection" data-bind="click: addPlaylist">
+        <i class="material-icons">playlist_add</i>
+      </div>
+      <div class="toolbar-icon disable-selection" data-bind="click: next">
+        <i class="material-icons">skip_next</i>
+      </div>
+      <input type="url" class="flex" placeholder="YouTube Url" data-bind="value: itemUrl">
+      <div class="toolbar-icon disable-selection" data-bind="click: addItem">
+        <i class="material-icons">add</i>
+      </div>
     </div>
   </div>
 
   <div class="flex" style="overflow-x: auto;">
     <div class="playlist-list layout-vertical layout-center" data-bind="foreach: playlists">
       <div class="playlist-item">
-        <div class="playlist-title layout-horizontal layout-center">
-          <h2 class="flex" data-bind="text: 'Playlist #' + _id"></h2>
-          <div class="icon-button disable-selection" data-bind="click: $root.playPlaylist.bind($root)">
+        <div class="playlist-head layout-horizontal layout-center">
+          <div style="margin-right: 10px;" class="icon-button disable-selection" data-bind="click: $root.playPlaylist.bind($root)">
             <i class="material-icons">play_arrow</i>
+          </div>
+          <h2 class="playlist-title flex" data-bind="text: 'Playlist #' + _id, click: $root.playPlaylist.bind($root)"></h2>
+          <div class="icon-button disable-selection" data-bind="click: $root.removePlaylist.bind($root, $data)">
+            <i class="material-icons">delete</i>
           </div>
         </div>
         <div class="item-list layout-vertical" data-bind="foreach: items">
-          <div class="item-item" data-bind="css: { 'is-playing': $root.isPlaying(_id) }">
-            <div class="layout-horizontal layout-center">
+          <div class="item-item layout-horizontal layout-center" data-bind="css: { 'is-playing': $root.isPlaying(_id) }">
+            <div class="item-inner flex" data-bind="click: $root.playItem.bind($root, $data, $parent)">
               <h3 class="item-type flex" data-bind="text: type + ' #' + _id"></h3>
-              <i class="item-hearing material-icons">hearing</i>
+              <!-- ko with: options -->
+              <!-- ko if: $parent.type === "YouTube" -->
+              <div data-bind="text: url"></div>
+              <!-- /ko -->
+              <!-- /ko -->
             </div>
-            <!-- ko with: options -->
-            <!-- ko if: $parent.type === "YouTube" -->
-            <div data-bind="text: url"></div>
-            <!-- /ko -->
-            <!-- /ko -->
+            <i class="item-hearing material-icons">hearing</i>
+            <div class="icon-button disable-selection" data-bind="click: $root.removeItem.bind($root, $data, $parent)">
+              <i class="material-icons">delete</i>
+            </div>
           </div>
         </div>
       </div>
@@ -66,9 +79,23 @@
 
   <!-- ko with: metadata -->
   <div class="metadata">
-    <div data-bind="text: StreamTitle"></div>
+    <div class="metadata-inner layout-horizontal">
+      <div class="flex" data-bind="text: StreamTitle"></div>
+      <!-- ko if: $root.browserCanPlay -->
+      <div class="layout-vertical layout-center-center">
+        <input type="range" min="0" max="1" step="0.01" data-bind="value: $root.playerVolume" />
+      </div>
+      <!-- /ko -->
+    </div>
   </div>
   <!-- /ko -->
+  <audio data-bind="player: {
+    sourcePath: playerSourcePath,
+    isMuted: isPlayerMuted,
+    isPlaying: isPlayerPlaying,
+    volume: playerVolume,
+    canPlay: browserCanPlay
+  }"></audio>
 </body>
 
 </html>

@@ -12,6 +12,10 @@ var _info = require("./info");
 
 var _info2 = _interopRequireDefault(_info);
 
+var _bigBuffer = require("../big-buffer");
+
+var _bigBuffer2 = _interopRequireDefault(_bigBuffer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -34,6 +38,7 @@ var Stream = function (_EventEmitter) {
     _this.dataInterval = options.dataInterval || 500;
     _this.needMoreData = options.needMoreData || function () {};
     _this.streamInfos = [];
+    _this.bigBuffer = new _bigBuffer2.default();
     return _this;
   }
 

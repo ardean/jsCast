@@ -2,6 +2,7 @@ import {
   EventEmitter
 } from "events";
 import StreamInfo from "./info";
+import BigBuffer from "../big-buffer";
 
 export default class Stream extends EventEmitter {
   constructor(options) {
@@ -13,6 +14,7 @@ export default class Stream extends EventEmitter {
     this.dataInterval = options.dataInterval || 500;
     this.needMoreData = options.needMoreData || function () {};
     this.streamInfos = [];
+    this.bigBuffer = new BigBuffer();
   }
 
   start() {
