@@ -61,18 +61,18 @@ $ npm start
 
 ## Manage
 
-**Manage** is a `webapp` to control jscast *playlists* and *items*. the route is `/manage` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with `manage`. There is also a `player` *(using a audio tag)* embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
+**Manage** is a `webapp` to control jscast playlists and items. the route is `/manage` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with `manage`. There is also a `player` (using a audio tag) embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
 
 ## IcyServer
 
-The **IcyServer**'s task is to send the `SHOUTcast data` (received from the *Station*) to the `clients`. the route is `/` by default.
+The **IcyServer**'s task is to send the `SHOUTcast data` (received from the Station) to the `clients`. the route is `/` by default.
 
 ## Server
 
 The jscast **Server** combines `Manage` and the `IcyServer` to a simple to use application.
 
 ## Station
-The **Station** is the `core Class` which *controls* the `Stream` with his `data` and whatever *currently* is `playing`.
+The **Station** is the core class which controls the `Stream` with his `data` and whatever currently is playing.
 
 ## Item Types
 
@@ -89,7 +89,7 @@ Built-in item types:
 Built-in storage types:
 
 - **JSON** creates a folder with a json file per playlist, filename is the `playlist id`
-- **Memory** stores playlists in memory, so *`changes will be lost`* on shutdown
+- **Memory** stores playlists in memory, so `changes will be lost` on shutdown
 
 If thats not enough, you can create [your own one](#custom-storages)
 
