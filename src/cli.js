@@ -43,7 +43,7 @@ new Server({
       storageType: program.storageType,
       ffmpegPath: program.ffmpegPath,
       playlists: [
-        program.youtubeItems.map((item) => mapYouTubeList(item))
+        (program.youtubeItems || []).map((item) => mapYouTubeList(item))
       ]
     }
   })

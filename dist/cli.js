@@ -51,7 +51,7 @@ new _server2.default({
   stationOptions: {
     storageType: _commander2.default.storageType,
     ffmpegPath: _commander2.default.ffmpegPath,
-    playlists: [_commander2.default.youtubeItems.map(item => mapYouTubeList(item))]
+    playlists: [(_commander2.default.youtubeItems || []).map(item => mapYouTubeList(item))]
   }
 }).on("error", err => {
   console.error(err);
