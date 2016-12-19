@@ -39,6 +39,13 @@ function isInCountryList(geo, list) {
   return geo && list && list.length && list.some(country => country === geo.country);
 }
 
+const playlists = [];
+const playlist = (_commander2.default.youtubeItems || []).map(item => mapYouTubeList(item));
+
+if (playlist) {
+  playlists.push(playlist);
+}
+
 new _server2.default({
   allow: client => {
     // TODO: include in jscast server
@@ -51,7 +58,7 @@ new _server2.default({
   stationOptions: {
     storageType: _commander2.default.storageType,
     ffmpegPath: _commander2.default.ffmpegPath,
-    playlists: [(_commander2.default.youtubeItems || []).map(item => mapYouTubeList(item))]
+    playlists: playlists
   }
 }).on("error", err => {
   console.error(err);

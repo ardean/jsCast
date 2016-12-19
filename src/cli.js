@@ -27,6 +27,13 @@ function isInCountryList(geo, list) {
   return geo && list && list.length && list.some((country) => country === geo.country);
 }
 
+const playlists = [];
+const playlist = (program.youtubeItems || []).map((item) => mapYouTubeList(item));
+
+if (playlist) {
+  playlists.push(playlist);
+}
+
 new Server({
     allow: (client) => {
       // TODO: include in jscast server
@@ -42,9 +49,7 @@ new Server({
     stationOptions: {
       storageType: program.storageType,
       ffmpegPath: program.ffmpegPath,
-      playlists: [
-        (program.youtubeItems || []).map((item) => mapYouTubeList(item))
-      ]
+      playlists: playlists
     }
   })
   .on("error", (err) => {
