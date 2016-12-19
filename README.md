@@ -1,8 +1,8 @@
 # jscast
 
-[![NPM Version](http://img.shields.io/npm/v/jscast.svg?style=flat)](https://www.npmjs.org/package/jscast)
+[![NPM Version][npm-image]][downloads-url] [![NPM Downloads][downloads-image]][downloads-url]
 
-A SHOUTcast Server/Library written in JavaScript
+**A SHOUTcast Server/Library written in JavaScript**
 
 ![jscast - manage](/docs/images/jscast-manage.png)
 
@@ -223,4 +223,9 @@ new Server({
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+[downloads-image]: https://img.shields.io/npm/dm/jscast.svg
+[downloads-url]: https://npmjs.org/package/jscast
+[npm-image]: https://img.shields.io/npm/v/jscast.svg
+[npm-url]: https://npmjs.org/package/jscast

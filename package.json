@@ -1,6 +1,6 @@
 {
   "name": "jscast",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "A SHOUTcast Server/Library written in JavaScript",
   "author": "BigTeri",
   "license": "MIT",
