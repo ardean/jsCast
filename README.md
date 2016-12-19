@@ -134,30 +134,32 @@ MyItemType.prototype.getMetadata = function (item, done) {
 Item.registerType("MyItem", new MyItemType());
 
 new Server({
-  storageType: "Memory",
-  playlists: [{
-    type: "MyItem",
-    options: {
-      myProp: "myValue"
-    }
-  }, {
-    type: "YouTube",
-    options: {
-      url: "https://www.youtube.com/watch?v=hhHXAMpnUPM"
-    }
-  }, {
-    type: "Stream",
-    options: {
-      title: "A cool audio stream!",
-      stream: fs.creadReadStream("./sound.mp3")
-    }
-  }, {
-    type: "File",
-    options: {
-      title: "NICE TRACK!",
-      filename: "./myTrack.mp3"
-    }
-  }]
+  stationOptions: {
+    storageType: "Memory",
+    playlists: [{
+      type: "MyItem",
+      options: {
+        myProp: "myValue"
+      }
+    }, {
+      type: "YouTube",
+      options: {
+        url: "https://www.youtube.com/watch?v=hhHXAMpnUPM"
+      }
+    }, {
+      type: "Stream",
+      options: {
+        title: "A cool audio stream!",
+        stream: fs.creadReadStream("./sound.mp3")
+      }
+    }, {
+      type: "File",
+      options: {
+        title: "NICE TRACK!",
+        filename: "./myTrack.mp3"
+      }
+    }]
+  }
 }).listen();
 ```
 
@@ -208,7 +210,9 @@ MyStorageType.prototype.remove = function (playlistId, done) {
 Storage.registerType("MyStorage", new MyStorageType());
 
 new Server({
-  storageType: "MyStorage"
+  stationOptions: {
+    storageType: "MyStorage"
+  }
 }).listen();
 ```
 
