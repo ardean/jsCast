@@ -1,10 +1,22 @@
-import {
-  EventEmitter
-} from "events";
-import StreamInfo from "./info";
-import BigBuffer from "../big-buffer";
+"use strict";
 
-export default class Stream extends EventEmitter {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _events = require("events");
+
+var _info = require("./info");
+
+var _info2 = _interopRequireDefault(_info);
+
+var _bigBuffer = require("../big-buffer");
+
+var _bigBuffer2 = _interopRequireDefault(_bigBuffer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Stream extends _events.EventEmitter {
   constructor(options) {
     super();
 
@@ -14,7 +26,7 @@ export default class Stream extends EventEmitter {
     this.dataInterval = options.dataInterval || 500;
     this.needMoreData = options.needMoreData || function () {};
     this.streamInfos = [];
-    this.bigBuffer = new BigBuffer();
+    this.bigBuffer = new _bigBuffer2.default();
   }
 
   start() {
@@ -74,13 +86,13 @@ export default class Stream extends EventEmitter {
   }
 
   next(stream, metadata, item) {
-    this.streamInfos.push(new StreamInfo(stream, metadata, item));
+    this.streamInfos.push(new _info2.default(stream, metadata, item));
     this.checkNextStream();
   }
 
   replace(stream, metadata, item) {
-    this.streamInfos.forEach((streamInfo) => streamInfo.destroy());
-    this.streamInfos = [new StreamInfo(stream, metadata, item)];
+    this.streamInfos.forEach(streamInfo => streamInfo.destroy());
+    this.streamInfos = [new _info2.default(stream, metadata, item)];
     this.didAlreadyRequest = true;
     this.checkNextStream();
   }
@@ -103,14 +115,15 @@ export default class Stream extends EventEmitter {
   }
 
   getCollectableStreamInfo() {
-    return this.streamInfos.find((streamInfo) => {
+    return this.streamInfos.find(streamInfo => {
       return !streamInfo.isCollected;
     });
   }
 
   isCollectingData() {
-    return this.streamInfos.some((streamInfo) => {
+    return this.streamInfos.some(streamInfo => {
       return streamInfo.isCollecting;
     });
   }
 }
+exports.default = Stream;

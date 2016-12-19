@@ -1,15 +1,42 @@
-import {
-  EventEmitter
-} from "events";
-import ffmpeg from "fluent-ffmpeg";
-import Stream from "../stream";
-import Storage from "../storage";
-import Playlist from "../playlist";
-import Metadata from "./metadata";
-import VirtualPlayer from "./virtual-player";
-import destroy from "destroy";
+"use strict";
 
-export default class Station extends EventEmitter {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _events = require("events");
+
+var _fluentFfmpeg = require("fluent-ffmpeg");
+
+var _fluentFfmpeg2 = _interopRequireDefault(_fluentFfmpeg);
+
+var _stream = require("../stream");
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _storage = require("../storage");
+
+var _storage2 = _interopRequireDefault(_storage);
+
+var _playlist = require("../playlist");
+
+var _playlist2 = _interopRequireDefault(_playlist);
+
+var _metadata = require("./metadata");
+
+var _metadata2 = _interopRequireDefault(_metadata);
+
+var _virtualPlayer = require("./virtual-player");
+
+var _virtualPlayer2 = _interopRequireDefault(_virtualPlayer);
+
+var _destroy = require("destroy");
+
+var _destroy2 = _interopRequireDefault(_destroy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Station extends _events.EventEmitter {
   constructor(options) {
     super();
 
@@ -22,15 +49,15 @@ export default class Station extends EventEmitter {
     this.storageType = options.storageType || "JSON";
     this.ffmpegPath = options.ffmpegPath || null;
 
-    this.ffmpegPath && ffmpeg.setFfmpegPath(this.ffmpegPath);
-    this.storage = new Storage(this.storageType);
-    this.virtualPlayer = new VirtualPlayer();
+    this.ffmpegPath && _fluentFfmpeg2.default.setFfmpegPath(this.ffmpegPath);
+    this.storage = new _storage2.default(this.storageType);
+    this.virtualPlayer = new _virtualPlayer2.default();
 
     this.itemId = null;
     this.item = null;
     this.metadata = null;
 
-    this.stream = new Stream({
+    this.stream = new _stream2.default({
       bufferSize: this.bufferSize,
       dataInterval: this.dataInterval,
       prebufferSize: this.prebufferSize,
@@ -51,13 +78,13 @@ export default class Station extends EventEmitter {
     this.playlistPlay = this.playlistPlay.bind(this);
     this.playlistReplace = this.playlistReplace.bind(this);
 
-    this.playlists = this.playlists.map((items) => new Playlist({
+    this.playlists = this.playlists.map(items => new _playlist2.default({
       items: items
     }));
   }
 
   start() {
-    this.storage.activate({}, (err) => {
+    this.storage.activate({}, err => {
       if (err) return console.log(err);
       this.storage.fill(this.playlists, () => {
         this.storage.findAll((err, playlists) => {
@@ -72,7 +99,7 @@ export default class Station extends EventEmitter {
 
   addPlaylist(playlist) {
     playlist = this.preparePlaylist(playlist);
-    this.storage.insert(playlist, (err) => {
+    this.storage.insert(playlist, err => {
       if (err) return console.log(err);
 
       this.playlists.push(playlist);
@@ -91,7 +118,7 @@ export default class Station extends EventEmitter {
       const wasPlaylistEmpty = playlist.items.length < 1;
       item = playlist.addItem(item);
 
-      this.storage.update(playlist, (err) => {
+      this.storage.update(playlist, err => {
         // TODO: remove item if err
         if (err) return console.log(err);
 
@@ -113,7 +140,7 @@ export default class Station extends EventEmitter {
       const removed = playlist.removeItem(id);
       const itemIndex = playlist.items.indexOf(removed);
       if (removed) {
-        this.storage.update(playlist, (err) => {
+        this.storage.update(playlist, err => {
           if (err) {
             playlist.items.splice(itemIndex, 0, removed);
             return console.error(err);
@@ -138,7 +165,7 @@ export default class Station extends EventEmitter {
     if (playlist) {
       const playlistIndex = this.playlists.indexOf(playlist);
       this.playlists.splice(playlistIndex, 1);
-      this.storage.remove(playlist._id, (err) => {
+      this.storage.remove(playlist._id, err => {
         if (err) {
           this.playlists.splice(playlistIndex, 0, playlist);
           return console.error(err);
@@ -159,7 +186,7 @@ export default class Station extends EventEmitter {
   preparePlaylist(playlist) {
     playlist = playlist || [];
     if (Array.isArray(playlist)) {
-      return new Playlist(playlist);
+      return new _playlist2.default(playlist);
     } else {
       return playlist;
     }
@@ -200,7 +227,7 @@ export default class Station extends EventEmitter {
   }
 
   findPlaylistById(id) {
-    return this.playlists.find((playlist) => {
+    return this.playlists.find(playlist => {
       return playlist._id === id;
     });
   }
@@ -257,7 +284,7 @@ export default class Station extends EventEmitter {
     this.handleStreamError(stream);
 
     stream = this.handlePostProcessing(stream, options);
-    metadata = new Metadata(metadata);
+    metadata = new _metadata2.default(metadata);
     this.stream.next(stream, metadata, item);
   }
 
@@ -268,7 +295,7 @@ export default class Station extends EventEmitter {
     this.handleStreamError(stream);
 
     stream = this.handlePostProcessing(stream, options);
-    metadata = new Metadata(metadata);
+    metadata = new _metadata2.default(metadata);
     this.stream.replace(stream, metadata, item);
   }
 
@@ -279,8 +306,8 @@ export default class Station extends EventEmitter {
   }
 
   handleStreamError(stream) {
-    return stream.once("error", (err) => {
-      destroy(stream);
+    return stream.once("error", err => {
+      (0, _destroy2.default)(stream);
       this.onPlayError(err);
     });
   }
@@ -289,8 +316,9 @@ export default class Station extends EventEmitter {
     options = options || {};
 
     if (options.streamNeedsPostProcessing) {
-      stream = ffmpeg(stream).audioBitrate(this.postProcessingBitRate).format("mp3");
+      stream = (0, _fluentFfmpeg2.default)(stream).audioBitrate(this.postProcessingBitRate).format("mp3");
     }
     return this.handleStreamError(stream);
   }
 }
+exports.default = Station;

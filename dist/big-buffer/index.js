@@ -1,8 +1,12 @@
-import {
-  EventEmitter
-} from "events";
+"use strict";
 
-export default class BigBuffer extends EventEmitter {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _events = require("events");
+
+class BigBuffer extends _events.EventEmitter {
   constructor(options) {
     super();
 
@@ -38,3 +42,4 @@ export default class BigBuffer extends EventEmitter {
     return buffer;
   }
 }
+exports.default = BigBuffer;

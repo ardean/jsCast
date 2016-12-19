@@ -1,4 +1,5 @@
 # jscast
+
 [![NPM Version](http://img.shields.io/npm/v/jscast.svg?style=flat)](https://www.npmjs.org/package/jscast)
 
 A SHOUTcast Server/Library written in JavaScript
@@ -18,13 +19,19 @@ $ npm i -g jscast
 Use the new command to start a Server:
 
 ```sh
-$ jscast-server
+$ jscast
 ```
-choose a different port with `-p 8888`
+
+- override default port: `-p PORT` / `--port PORT`
+- change storage type: `-s TYPE` / `--storage-type TYPE`
+- ffmpeg binary path: `--ffmpeg-path PATH`
+- initial youtube items - fillable storage types **only**: `--youtube-items URL1,URL2`
+- whitelist: `--whitelist COUNTRY1,COUNTRY2`
+- blacklist: `--blacklist COUNTRY3,COUNTRY4`
 
 ### Using Script
 
-```js
+```javascript
 var Server = require("jscast").Server;
 
 new Server().on("play", function (item, metadata) {
@@ -72,6 +79,7 @@ The **IcyServer**'s task is to send the `SHOUTcast data` (received from the Stat
 The jscast **Server** combines `Manage` and the `IcyServer` to a simple to use application.
 
 ## Station
+
 The **Station** is the core class which controls the `Stream` with his `data` and whatever currently is playing.
 
 ## Item Types
@@ -97,10 +105,9 @@ If thats not enough, you can create [your own one](#custom-storages)
 
 ### Custom Items
 
-jscast has playlists with [typed items](#item-types).
-You can easily add your own item type:
+jscast has playlists with [typed items](#item-types). You can easily add your own item type:
 
-```js
+```javascript
 var fs = require("fs");
 var jscast = require("jscast");
 var Item = jscast.Item;
@@ -158,7 +165,7 @@ new Server({
 
 You can use the built-in [storage types](#storage-types) or create your own one:
 
-```js
+```javascript
 var fs = require("fs");
 var jscast = require("jscast");
 var Storage = jscast.Storage;
@@ -205,9 +212,10 @@ new Server({
 }).listen();
 ```
 
-## API
+## TODO
 
-TODO...
+- API
+- Auth
 
 ## License
 

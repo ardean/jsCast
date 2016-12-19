@@ -66,14 +66,14 @@ export default class Server extends EventEmitter {
       port = null;
     }
 
-    this.port = port = port || this.port;
+    port = this.port = port || this.port;
 
     this.once("start", () => {
       this.station.start();
       done && done(this);
     });
 
-    this.socket.listen(this.port, () => {
+    this.socket.listen(port, () => {
       this.emit("start");
     });
   }

@@ -20,12 +20,21 @@ export default class Manage extends EventEmitter {
     this.rootPath = options.rootPath || "/manage";
     this.playerSourcePath = options.playerSourcePath || "/";
     this.staticFolderPath = options.staticFolderPath || path.join(__dirname, "../../", "./manage");
+    this.jspmPath = options.jspmPath || path.join(__dirname, "../../");
+    this.jspmPackagesPath = this.jspmPackagesPath || path.join(this.jspmPath, "./jspm_packages");
+    this.jspmConfigPath = this.jspmConfigPath || path.join(this.jspmPath, "./config.js");
     this.stationOptions = options.stationOptions || {};
     this.station = options.station || new Station(this.stationOptions);
 
     this.webRouter = new express.Router();
-    this.app.use(fixWindowsPath(path.join("/", this.rootPath)), this.webRouter);
     this.webRouter.use(express.static(fixWindowsPath(this.staticFolderPath)));
+    this.webRouter.use("/jspm_packages", express.static(fixWindowsPath(this.jspmPackagesPath)));
+    this.app.use(fixWindowsPath(path.join("/", this.rootPath)), this.webRouter);
+
+    this.jspmRouter = new express.Router();
+    this.jspmRouter.use(express.static(fixWindowsPath(this.jspmPackagesPath)));
+    this.app.use("/jspm_packages", this.jspmRouter);
+    this.app.get("/config.js", (req, res) => res.sendFile(fixWindowsPath(this.jspmConfigPath)));
 
     // TODO: allow for socket.io
     this.webSocketClients = [];
