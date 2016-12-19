@@ -30,7 +30,7 @@ function isInCountryList(geo, list) {
 const playlists = [];
 const playlist = (program.youtubeItems || []).map((item) => mapYouTubeList(item));
 
-if (playlist) {
+if (playlist.length) {
   playlists.push(playlist);
 }
 
