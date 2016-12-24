@@ -26,10 +26,6 @@ var _metadata = require("./metadata");
 
 var _metadata2 = _interopRequireDefault(_metadata);
 
-var _virtualPlayer = require("./virtual-player");
-
-var _virtualPlayer2 = _interopRequireDefault(_virtualPlayer);
-
 var _destroy = require("destroy");
 
 var _destroy2 = _interopRequireDefault(_destroy);
@@ -51,7 +47,6 @@ class Station extends _events.EventEmitter {
 
     this.ffmpegPath && _fluentFfmpeg2.default.setFfmpegPath(this.ffmpegPath);
     this.storage = new _storage2.default(this.storageType);
-    this.virtualPlayer = new _virtualPlayer2.default();
 
     this.itemId = null;
     this.item = null;
@@ -318,6 +313,7 @@ class Station extends _events.EventEmitter {
     if (options.streamNeedsPostProcessing) {
       stream = (0, _fluentFfmpeg2.default)(stream).audioBitrate(this.postProcessingBitRate).format("mp3");
     }
+
     return this.handleStreamError(stream);
   }
 }

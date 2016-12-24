@@ -20,24 +20,23 @@ var _socket = require("socket.io");
 
 var _socket2 = _interopRequireDefault(_socket);
 
-var _station = require("../station");
+var _station = require("../../../station");
 
 var _station2 = _interopRequireDefault(_station);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class Manage extends _events.EventEmitter {
-  constructor(options) {
-    super();
-
+  activate(options) {
     options = options || {};
 
     this.app = options.app || (0, _express2.default)();
     this.socket = options.socket || new _http.Server(this.app);
+    this.port = options.port || 8000;
     this.rootPath = options.rootPath || "/manage";
     this.playerSourcePath = options.playerSourcePath || "/";
-    this.staticFolderPath = options.staticFolderPath || _path2.default.join(__dirname, "../../", "./manage");
-    this.jspmPath = options.jspmPath || _path2.default.join(__dirname, "../../");
+    this.staticFolderPath = options.staticFolderPath || _path2.default.join(__dirname, "../../../../", "./manage");
+    this.jspmPath = options.jspmPath || _path2.default.join(__dirname, "../../../../");
     this.jspmPackagesPath = this.jspmPackagesPath || _path2.default.join(this.jspmPath, "./jspm_packages");
     this.jspmConfigPath = this.jspmConfigPath || _path2.default.join(this.jspmPath, "./config.js");
     this.stationOptions = options.stationOptions || {};
@@ -53,19 +52,19 @@ class Manage extends _events.EventEmitter {
     this.app.use("/jspm_packages", this.jspmRouter);
     this.app.get("/config.js", (req, res) => res.sendFile(fixWindowsPath(this.jspmConfigPath)));
 
-    // TODO: allow for socket.io
     this.webSocketClients = [];
+    // TODO: allow for socket.io
     this.io = (0, _socket2.default)(this.socket, {
       path: fixWindowsPath(_path2.default.join("/", this.rootPath, "/sockets"))
-    }).on("connection", socket => {
-      this.webSocketClients.push(socket);
-      this.emit("webSocketClientConnect", socket);
+    }).on("connection", clientSocket => {
+      this.webSocketClients.push(clientSocket);
+      this.emit("webSocketClientConnect", clientSocket);
 
-      socket.once("disconnect", () => {
-        this.webSocketClients.splice(this.webSocketClients.indexOf(socket), 1);
-        this.emit("webSocketClientDisconnect", socket);
+      clientSocket.once("disconnect", () => {
+        this.webSocketClients.splice(this.webSocketClients.indexOf(clientSocket), 1);
+        this.emit("webSocketClientDisconnect", clientSocket);
       }).on("fetch", () => {
-        socket.emit("info", {
+        clientSocket.emit("info", {
           item: this.station.item,
           metadata: this.station.metadata,
           playlists: this.station.playlists,
@@ -90,24 +89,24 @@ class Manage extends _events.EventEmitter {
     });
 
     this.station.on("play", (item, metadata) => {
-      this.webSocketClients.forEach(socket => {
-        socket.emit("playing", item, metadata);
+      this.webSocketClients.forEach(clientSocket => {
+        clientSocket.emit("playing", item, metadata);
       });
     }).on("playlistCreated", playlist => {
-      this.webSocketClients.forEach(socket => {
-        socket.emit("playlistCreated", playlist);
+      this.webSocketClients.forEach(clientSocket => {
+        clientSocket.emit("playlistCreated", playlist);
       });
     }).on("itemCreated", (item, playlist) => {
-      this.webSocketClients.forEach(socket => {
-        socket.emit("itemCreated", item, playlist._id);
+      this.webSocketClients.forEach(clientSocket => {
+        clientSocket.emit("itemCreated", item, playlist._id);
       });
     }).on("itemRemoved", (item, playlist) => {
-      this.webSocketClients.forEach(socket => {
-        socket.emit("itemRemoved", item._id, playlist._id);
+      this.webSocketClients.forEach(clientSocket => {
+        clientSocket.emit("itemRemoved", item._id, playlist._id);
       });
     }).on("playlistRemoved", playlist => {
-      this.webSocketClients.forEach(socket => {
-        socket.emit("playlistRemoved", playlist._id);
+      this.webSocketClients.forEach(clientSocket => {
+        clientSocket.emit("playlistRemoved", playlist._id);
       });
     });
   }

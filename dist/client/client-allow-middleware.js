@@ -9,6 +9,7 @@ exports.default = function (allow, rejected) {
     const client = req.jscastClient;
     if (client) {
       if (!allow(client)) {
+        // TODO: allow promise
         rejected(client);
         return res.sendStatus(404);
       } else {

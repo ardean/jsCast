@@ -2,7 +2,7 @@ export default function (allow, rejected) {
   return function (req, res, next) {
     const client = req.jscastClient;
     if (client) {
-      if (!allow(client)) {
+      if (!allow(client)) { // TODO: allow promise
         rejected(client);
         return res.sendStatus(404);
       } else {

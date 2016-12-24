@@ -2,7 +2,13 @@
 
 [![NPM Version][npm-image]][downloads-url] [![NPM Downloads][downloads-image]][downloads-url]
 
-**A SHOUTcast Server/Library written in JavaScript**
+**An Audio Streaming Application written in JavaScript**
+
+- _storage types / API_
+- _input (item) types / API_
+- _plugin types / API_
+- _CLI support_
+  - _whitelist / blacklist_
 
 ![jscast - manage](/docs/images/jscast-manage.png)
 
@@ -16,7 +22,7 @@ Install jscast globally:
 $ npm i -g jscast
 ```
 
-Use the new command to start a Server:
+Use the new command to start an instance:
 
 ```sh
 $ jscast
@@ -24,6 +30,7 @@ $ jscast
 
 - override default port: `-p PORT` / `--port PORT`
 - change storage type: `-s TYPE` / `--storage-type TYPE`
+- set active plugins: `-t TYPE1,TYPE2` / `--plugin-types TYPE1,TYPE2`
 - ffmpeg binary path: `--ffmpeg-path PATH`
 - initial youtube items - fillable storage types **only**: `--youtube-items URL1,URL2`
 - whitelist: `--whitelist COUNTRY1,COUNTRY2`
@@ -32,15 +39,59 @@ $ jscast
 ### Using Script
 
 ```javascript
-var Server = require("jscast").Server;
+import jscast from "jscast";
+import {
+  log
+} from "util";
 
-new Server().on("play", function (item, metadata) {
-  console.log("playing " + metadata.options.StreamTitle);
-}).listen(8000, function (server) {
-  console.log("jscast server is running");
-  console.log("listen on http://localhost:" + server.port + server.icyServerRootPath);
-  console.log("manage on http://localhost:" + server.port + server.manageRootPath + " your playlists and items");
-});
+const instance = jscast()
+  .on("clientRejected", (client) => {
+    log(`client ${client.ip} rejected`);
+  });
+
+const icyServer = instance.pluginManager.getActiveType("IcyServer");
+const manage = instance.pluginManager.getActiveType("Manage");
+
+instance
+  .station
+  .on("play", (item, metadata) => {
+    log(`playing ${metadata.options.StreamTitle}`);
+  })
+  .on("nothingToPlay", (playlist) => {
+    if (!playlist) {
+      log("no playlist");
+    } else {
+      log("playlist is empty");
+    }
+  });
+
+instance
+  .start({
+    port: 8000,
+    allow: (client) => {
+      return true; // allow this client
+    }
+  })
+  .then(() => {
+    log(`jscast is running`);
+
+    if (icyServer) {
+      icyServer
+        .on("clientConnect", (client) => {
+          log(`icy client ${client.ip} connected`);
+        })
+        .on("clientDisconnect", (client) => {
+          log(`icy client ${client.ip} disconnected`);
+        });
+
+      log(`listen on http://localhost:${icyServer.port}${icyServer.rootPath}`);
+    }
+
+    if (manage) {
+      log(`manage on http://localhost:${manage.port}${manage.rootPath} your playlists and items`);
+    }
+  })
+  .catch((err) => console.error(err));
 ```
 
 ## Prerequisites
@@ -66,17 +117,19 @@ $ npm i
 $ npm start
 ```
 
-## Manage
+## Plugin Types
+
+### Manage
 
 **Manage** is a `webapp` to control jscast playlists and items. the route is `/manage` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with `manage`. There is also a `player` (using a audio tag) embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
 
-## IcyServer
+### IcyServer
 
 The **IcyServer**'s task is to send the `SHOUTcast data` (received from the Station) to the `clients`. the route is `/` by default.
 
-## Server
+### Speaker
 
-The jscast **Server** combines `Manage` and the `IcyServer` to a simple to use application.
+This Plugin outputs the current track to the speakers.
 
 ## Station
 
@@ -108,32 +161,38 @@ If thats not enough, you can create [your own one](#custom-storages)
 jscast has playlists with [typed items](#item-types). You can easily add your own item type:
 
 ```javascript
-var fs = require("fs");
-var jscast = require("jscast");
-var Item = jscast.Item;
-var Server = jscast.Server;
+import fs from "fs";
+import {
+  default as jscast,
+  Item
+} from "jscast";
+import {
+  log
+} from "util";
 
-function MyItemType() {
-  this.streamNeedsPostProcessing = true; // indicates if stream should be post processed to mp3
+class MyItemType {
+  constructor() {
+    this.streamNeedsPostProcessing = true; // indicates if stream should be post processed to mp3
+  }
+
+  getStream(item, done) {
+    // get stream code...
+    log(item.type); // MyItem
+    done && done(err, stream);
+  }
+
+  getMetadata(item, done) {
+    // get metadata code...
+    log(item.options.myProp); // myValue
+    done && done(err, {
+      StreamTitle: "my title"
+    });
+  }
 }
-
-MyItemType.prototype.getStream = function (item, done) {
-  // get stream code...
-  console.log(item.type); // MyItem
-  done && done(err, stream);
-};
-
-MyItemType.prototype.getMetadata = function (item, done) {
-  // get metadata code...
-  console.log(item.options.myProp); // myValue
-  done && done(err, {
-    StreamTitle: "my title"
-  });
-};
 
 Item.registerType("MyItem", new MyItemType());
 
-new Server({
+jscast({
   stationOptions: {
     storageType: "Memory",
     playlists: [{
@@ -160,7 +219,9 @@ new Server({
       }
     }]
   }
-}).listen();
+})
+.start()
+.catch((err) => console.error(err));
 ```
 
 ### Custom Storages
@@ -168,58 +229,63 @@ new Server({
 You can use the built-in [storage types](#storage-types) or create your own one:
 
 ```javascript
-var fs = require("fs");
-var jscast = require("jscast");
-var Storage = jscast.Storage;
-var Server = jscast.Server;
+import {
+  default as jscast,
+  Storage
+} from "jscast";
 
-function MyStorageType() {
-  this.isFillable = true; // indicates that this type can be pre filled on init
+class MyStorageType {
+  constructor() {
+    this.isFillable = true; // indicates that this type can be pre filled on init
+  }
+
+  activate(options, done) {
+    // initialize code...
+    done && done(err);
+  }
+
+  fill(playlists, done) {
+    // fill storage from playlists option in Server and Station class
+    done && done(err);
+  }
+
+  findAll(done) {
+    // findAll code...
+    done && done(err, playlists);
+  }
+
+  insert(playlist, done) {
+    // insert code...
+    done && done(err);
+  }
+
+  update(playlist, done) {
+    // update code...
+    done && done(err);
+  }
+
+  remove(playlistId, done) {
+    // remove code...
+    done && done(err);
+  }
 }
-
-MyStorageType.prototype.activate = function (options, done) {
-  // initialize code...
-  done && done(err);
-};
-
-MyStorageType.prototype.fill = function (playlists, done) {
-  // fill storage from playlists option in Server and Station class
-  done && done(err);
-};
-
-MyStorageType.prototype.findAll = function (done) {
-  // findAll code...
-  done && done(err, playlists);
-};
-
-MyStorageType.prototype.insert = function (playlist, done) {
-  // insert code...
-  done && done(err);
-};
-
-MyStorageType.prototype.update = function (playlist, done) {
-  // update code...
-  done && done(err);
-};
-
-MyStorageType.prototype.remove = function (playlistId, done) {
-  // remove code...
-  done && done(err);
-};
 
 Storage.registerType("MyStorage", new MyStorageType());
 
-new Server({
+jscast({
   stationOptions: {
     storageType: "MyStorage"
   }
-}).listen();
+})
+.start()
+.catch((err) => console.error(err));
 ```
 
 ## TODO
 
-- API
-- Auth
+- API Documentation
+- Authentication
+- Change async to Promise
 
 ## License
 

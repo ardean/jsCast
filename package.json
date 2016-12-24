@@ -1,7 +1,7 @@
 {
   "name": "jscast",
-  "version": "0.3.5",
-  "description": "A SHOUTcast Server/Library written in JavaScript",
+  "version": "0.4.0",
+  "description": "An Audio Streaming Application written in JavaScript",
   "author": "BigTeri",
   "license": "MIT",
   "repository": "https://github.com/BigTeri/jscast",
@@ -16,10 +16,12 @@
     "geoip-lite": "^1.1.8",
     "ip": "^1.1.3",
     "jspm": "^0.16.48",
+    "lame": "^1.2.4",
     "mkdirp": "^0.5.1",
     "shortid": "^2.2.6",
     "sm-parsers": "^0.1.2",
     "socket.io": "^1.4.8",
+    "speaker": "^0.3.0",
     "ytdl-core": "^0.7.17"
   },
   "devDependencies": {
@@ -29,7 +31,8 @@
   "scripts": {
     "start": "babel-node demo --presets es2015-node",
     "build": "babel src --out-dir dist --presets es2015-node",
-    "debug-cli": "npm run build && node ./dist/cli.js -p 8000 --ffmpeg-path C:/projects/ffmpeg/bin/ffmpeg.exe -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag",
+    "debug-cli": "npm run build && node ./dist/cli.js -p 8000 -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag -t IcyServer,Manage",
+    "debug-cli-win": "npm run build && node ./dist/cli.js -p 8000 -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag --ffmpeg-path C:/projects/ffmpeg/bin/ffmpeg.exe",
     "postinstall": "jspm i --production"
   },
   "bin": {

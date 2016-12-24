@@ -2,7 +2,6 @@ import {
   EventEmitter
 } from "events";
 import StreamInfo from "./info";
-import BigBuffer from "../big-buffer";
 
 export default class Stream extends EventEmitter {
   constructor(options) {
@@ -14,7 +13,6 @@ export default class Stream extends EventEmitter {
     this.dataInterval = options.dataInterval || 500;
     this.needMoreData = options.needMoreData || function () {};
     this.streamInfos = [];
-    this.bigBuffer = new BigBuffer();
   }
 
   start() {
@@ -68,9 +66,11 @@ export default class Stream extends EventEmitter {
   }
 
   getRealtimeBufferSize() {
-    return this.streamInfos.map(streamInfo => streamInfo.buffer.length).reduce((previous, length) => {
-      return previous + length;
-    }, 0);
+    return this.streamInfos
+      .map(streamInfo => streamInfo.buffer.length)
+      .reduce((previous, length) => {
+        return previous + length;
+      }, 0);
   }
 
   next(stream, metadata, item) {

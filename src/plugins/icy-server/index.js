@@ -5,14 +5,13 @@ import {
   Server as HttpServer
 } from "http";
 import express from "express";
-import Station from "../station";
-import Client from "../client";
+import Station from "../../station";
+import Client from "../../client";
 
 export default class IcyServer extends EventEmitter {
-  constructor(options) {
-    super();
-
+  activate(options) {
     options = options || {};
+
     this.name = options.name || "jscast - A SHOUTcast Server/Library written in JavaScript";
     this.url = options.url || "https://github.com/BigTeri/jscast";
     this.genre = options.genre || "Music";
@@ -26,20 +25,19 @@ export default class IcyServer extends EventEmitter {
     this.station = options.station || new Station(this.stationOptions);
     this.app = options.app || express();
     this.socket = options.socket || new HttpServer(this.app);
+    this.port = options.port || 8000;
 
     this.station.on("data", (data, metadata) => {
       if (data) {
         let metadataBuffer = data;
+
         if (!this.skipMetadata) {
           metadataBuffer = metadata.createCombinedBuffer(data);
         }
+
         this.clients.forEach((client) => {
           const sendMetadata = !this.skipMetadata && client.wantsMetadata;
-          if (sendMetadata) {
-            client.write(metadataBuffer);
-          } else {
-            client.write(data);
-          }
+          client.write(sendMetadata ? metadataBuffer : data);
         });
       }
     });

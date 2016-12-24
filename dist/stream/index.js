@@ -10,10 +10,6 @@ var _info = require("./info");
 
 var _info2 = _interopRequireDefault(_info);
 
-var _bigBuffer = require("../big-buffer");
-
-var _bigBuffer2 = _interopRequireDefault(_bigBuffer);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class Stream extends _events.EventEmitter {
@@ -26,7 +22,6 @@ class Stream extends _events.EventEmitter {
     this.dataInterval = options.dataInterval || 500;
     this.needMoreData = options.needMoreData || function () {};
     this.streamInfos = [];
-    this.bigBuffer = new _bigBuffer2.default();
   }
 
   start() {

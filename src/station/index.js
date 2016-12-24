@@ -6,7 +6,6 @@ import Stream from "../stream";
 import Storage from "../storage";
 import Playlist from "../playlist";
 import Metadata from "./metadata";
-import VirtualPlayer from "./virtual-player";
 import destroy from "destroy";
 
 export default class Station extends EventEmitter {
@@ -24,7 +23,6 @@ export default class Station extends EventEmitter {
 
     this.ffmpegPath && ffmpeg.setFfmpegPath(this.ffmpegPath);
     this.storage = new Storage(this.storageType);
-    this.virtualPlayer = new VirtualPlayer();
 
     this.itemId = null;
     this.item = null;
@@ -289,8 +287,11 @@ export default class Station extends EventEmitter {
     options = options || {};
 
     if (options.streamNeedsPostProcessing) {
-      stream = ffmpeg(stream).audioBitrate(this.postProcessingBitRate).format("mp3");
+      stream = ffmpeg(stream)
+        .audioBitrate(this.postProcessingBitRate)
+        .format("mp3");
     }
+
     return this.handleStreamError(stream);
   }
 }

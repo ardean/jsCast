@@ -1,7 +1,10 @@
 import {
   log
 } from "util";
-import Server from "../src";
+import {
+  default as jscast,
+  PluginManager
+} from "../src";
 import geoip from "geoip-lite";
 import ip from "ip";
 
@@ -28,20 +31,31 @@ const suicidePlaylist = [
   "https://www.youtube.com/watch?v=7S8t_LfA3y0"
 ].map(mapYouTubeList);
 
-new Server({
-    manageRootPath: "/",
-    icyServerRootPath: "/listen",
-    stationOptions: {
-      ffmpegPath: "C:/projects/ffmpeg/bin/ffmpeg.exe",
-      storageType: "Memory",
-      playlists: [
-        yogscastPlaylist,
-        suicidePlaylist
-      ]
-    }
-  })
-  .on("error", (err) => {
-    console.error(err);
+const jscastOptions = {
+  // manageRootPath: "/",
+  // icyServerRootPath: "/listen",
+  stationOptions: {
+    // ffmpegPath: "C:/projects/ffmpeg/bin/ffmpeg.exe",
+    storageType: "Memory",
+    playlists: [
+      yogscastPlaylist,
+      suicidePlaylist
+    ]
+  }
+};
+
+const instance = jscast(jscastOptions)
+  .on("clientRejected", (client) => {
+    log(`client ${client.ip} rejected`);
+  });
+
+const icyServer = instance.pluginManager.getActiveType("IcyServer");
+const manage = instance.pluginManager.getActiveType("Manage");
+
+instance
+  .station
+  .on("play", (item, metadata) => {
+    log(`playing ${metadata.options.StreamTitle}`);
   })
   .on("nothingToPlay", (playlist) => {
     if (!playlist) {
@@ -49,21 +63,31 @@ new Server({
     } else {
       log("playlist is empty");
     }
+  });
+
+instance
+  .start({
+    port: 8000
   })
-  .on("play", (item, metadata) => {
-    log(`playing ${metadata.options.StreamTitle}`);
+  .then(() => {
+    log(`jscast is running`);
+
+    if (icyServer) {
+      icyServer
+        .on("clientConnect", (client) => {
+          log(`icy client ${client.ip} connected`);
+        })
+        .on("clientDisconnect", (client) => {
+          log(`icy client ${client.ip} disconnected`);
+        });
+
+      log(`listen on http://localhost:${icyServer.port}${icyServer.rootPath}`);
+    }
+
+    if (manage) {
+      log(`manage on http://localhost:${manage.port}${manage.rootPath}`);
+    }
   })
-  .on("clientRejected", (client) => {
-    log(`client ${client.ip} rejected`);
-  })
-  .on("icyServerClientConnect", (client) => {
-    log(`client ${client.ip} connected`);
-  })
-  .on("icyServerClientDisconnect", (client) => {
-    log(`client ${client.ip} disconnected`);
-  })
-  .listen(8888, (server) => {
-    log(`jscast server is running`);
-    log(`listen on http://localhost:${server.port}${server.icyServerRootPath}`);
-    log(`manage on http://localhost:${server.port}${server.manageRootPath}`);
+  .catch((err) => {
+    console.error(err);
   });
