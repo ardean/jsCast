@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>jsCast - Web</title>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="css/normalize.css" rel="stylesheet">
+  <link href="css/layout.css" rel="stylesheet">
+  <link href="css/global.css" rel="stylesheet">
+  <link href="css/index.css" rel="stylesheet">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  <meta name="theme-color" content="#FF5722">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#FF5722">
+</head>
+
+<body class="layout-vertical">
+  <div class="head">
+    <h1 class="head-title">jsCast - Web</h1>
+    <div class="toolbar layout-horizontal">
+      <div class="toolbar-icon disable-selection" data-bind="click: addPlaylist">
+        <i class="material-icons">playlist_add</i>
+      </div>
+      <div class="toolbar-icon disable-selection" data-bind="click: next">
+        <i class="material-icons">skip_next</i>
+      </div>
+      <input type="url" class="flex" placeholder="YouTube Url" data-bind="value: itemUrl">
+      <div class="toolbar-icon disable-selection" data-bind="click: addItem">
+        <i class="material-icons">add</i>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex" style="overflow-x: auto;">
+    <div class="playlist-list layout-vertical layout-center" data-bind="foreach: playlists">
+      <div class="playlist-item">
+        <div class="playlist-head layout-horizontal layout-center">
+          <div style="margin-right: 10px;" class="icon-button disable-selection" data-bind="click: $root.playPlaylist.bind($root)">
+            <i class="material-icons">play_arrow</i>
+          </div>
+          <h2 class="playlist-title flex" data-bind="text: 'Playlist #' + _id, click: $root.playPlaylist.bind($root)"></h2>
+          <div class="icon-button disable-selection" data-bind="click: $root.removePlaylist.bind($root, $data)">
+            <i class="material-icons">delete</i>
+          </div>
+        </div>
+        <div class="item-list layout-vertical" data-bind="foreach: items">
+          <div class="item-item layout-horizontal layout-center" data-bind="css: { 'is-playing': $root.isPlaying(_id) }">
+            <div class="item-inner flex" data-bind="click: $root.playItem.bind($root, $data, $parent)">
+              <h3 class="item-type flex" data-bind="text: type + ' #' + _id"></h3>
+              <!-- ko with: options -->
+              <!-- ko if: $parent.type === "YouTube" -->
+              <div data-bind="text: url"></div>
+              <!-- /ko -->
+              <!-- /ko -->
+            </div>
+            <i class="item-hearing material-icons">hearing</i>
+            <div class="icon-button disable-selection" data-bind="click: $root.removeItem.bind($root, $data, $parent)">
+              <i class="material-icons">delete</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ko with: metadata -->
+  <div class="metadata">
+    <div class="metadata-inner layout-horizontal">
+      <div class="flex" data-bind="text: StreamTitle"></div>
+      <!-- ko if: $root.browserCanPlay -->
+      <div class="layout-vertical layout-center-center">
+        <input type="range" min="0" max="1" step="0.01" data-bind="value: $root.playerVolume" />
+      </div>
+      <!-- /ko -->
+    </div>
+  </div>
+  <!-- /ko -->
+  <audio data-bind="player: {
+    sourcePath: playerSourcePath,
+    isMuted: isPlayerMuted,
+    isPlaying: isPlayerPlaying,
+    volume: playerVolume,
+    canPlay: browserCanPlay
+  }"></audio>
+
+    <script src="sockets/socket.io.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

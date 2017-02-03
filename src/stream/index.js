@@ -1,6 +1,4 @@
-import {
-  EventEmitter
-} from "events";
+import { EventEmitter } from "events";
 import StreamInfo from "./info";
 
 export default class Stream extends EventEmitter {

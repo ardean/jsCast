@@ -1,10 +1,28 @@
-import { EventEmitter } from "events";
-import { Server as HttpServer } from "http";
-import express from "express";
-import Station from "../../station";
-import Client from "../../client";
+"use strict";
 
-export default class IcyServer extends EventEmitter {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _events = require("events");
+
+var _http = require("http");
+
+var _express = require("express");
+
+var _express2 = _interopRequireDefault(_express);
+
+var _station = require("../../station");
+
+var _station2 = _interopRequireDefault(_station);
+
+var _client = require("../../client");
+
+var _client2 = _interopRequireDefault(_client);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class IcyServer extends _events.EventEmitter {
   activate(options) {
     options = options || {};
 
@@ -18,9 +36,9 @@ export default class IcyServer extends EventEmitter {
     this.rootPath = options.rootPath || "/";
 
     this.stationOptions = options.stationOptions || {};
-    this.station = options.station || new Station(this.stationOptions);
-    this.app = options.app || express();
-    this.socket = options.socket || new HttpServer(this.app);
+    this.station = options.station || new _station2.default(this.stationOptions);
+    this.app = options.app || (0, _express2.default)();
+    this.socket = options.socket || new _http.Server(this.app);
     this.port = options.port || 8000;
 
     this.station.on("data", (data, metadata) => {
@@ -31,7 +49,7 @@ export default class IcyServer extends EventEmitter {
           metadataBuffer = metadata.createCombinedBuffer(data);
         }
 
-        this.clients.forEach((client) => {
+        this.clients.forEach(client => {
           const sendMetadata = !this.skipMetadata && client.wantsMetadata;
           client.write(sendMetadata ? metadataBuffer : data);
         });
@@ -39,7 +57,7 @@ export default class IcyServer extends EventEmitter {
     });
 
     this.clients = [];
-    this.app.get(this.rootPath, (req, res) => this.clientConnected(new Client(req, res)));
+    this.app.get(this.rootPath, (req, res) => this.clientConnected(new _client2.default(req, res)));
   }
 
   clientConnected(client) {
@@ -68,3 +86,4 @@ export default class IcyServer extends EventEmitter {
     };
   }
 }
+exports.default = IcyServer;

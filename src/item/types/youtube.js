@@ -13,7 +13,7 @@ export default class YouTubeType {
     ytdl.getInfo(item.options.url, (err, info) => {
       if (err) return done(err);
       done(null, {
-        StreamTitle: info.author + " - " + info.title
+        StreamTitle: info.author.name + " - " + info.title
       });
     });
   }

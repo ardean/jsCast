@@ -1,4 +1,4 @@
-import ManageType from "./manage";
+import WebClient from "./web-client";
 import IcyServerType from "./icy-server";
 import SpeakerType from "./speaker";
 
@@ -8,7 +8,7 @@ export default class PluginManager {
   constructor(options) {
     options = options || {};
 
-    this.types = options.types || ["Manage", "IcyServer", "Speaker"];
+    this.types = options.types || ["WebClient", "IcyServer", "Speaker"];
     this.typePlugins = this.types.map((type) => PluginManager.getType(type));
   }
 
@@ -66,6 +66,6 @@ export default class PluginManager {
   }
 }
 
-PluginManager.registerType("Manage", new ManageType());
+PluginManager.registerType("WebClient", new WebClient());
 PluginManager.registerType("IcyServer", new IcyServerType());
 PluginManager.registerType("Speaker", new SpeakerType());

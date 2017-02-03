@@ -1,6 +1,4 @@
-import {
-  EventEmitter
-} from "events";
+import { EventEmitter } from "events";
 import shortid from "shortid";
 import Item from "../item";
 

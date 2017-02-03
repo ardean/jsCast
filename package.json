@@ -1,11 +1,26 @@
 {
   "name": "jscast",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "An Audio Streaming Application written in JavaScript",
-  "author": "BigTeri",
+  "author": "ardean",
   "license": "MIT",
-  "repository": "https://github.com/BigTeri/jscast",
-  "bugs": "https://github.com/BigTeri/jscast/issues",
+  "keywords": [
+    "blacklist",
+    "cli",
+    "ffmpeg",
+    "icecast",
+    "jscast",
+    "json",
+    "radio",
+    "radio-station",
+    "station",
+    "storage-types",
+    "stream",
+    "whitelist",
+    "youtube"
+  ],
+  "repository": "https://github.com/ardean/jsCast",
+  "bugs": "https://github.com/ardean/jsCast/issues",
   "main": "dist/index.js",
   "dependencies": {
     "async": "^2.0.1",
@@ -15,39 +30,65 @@
     "fluent-ffmpeg": "^2.1.0",
     "geoip-lite": "^1.1.8",
     "ip": "^1.1.3",
-    "jspm": "^0.16.48",
     "lame": "^1.2.4",
     "mkdirp": "^0.5.1",
     "shortid": "^2.2.6",
     "sm-parsers": "^0.1.2",
     "socket.io": "^1.4.8",
     "speaker": "^0.3.0",
-    "ytdl-core": "^0.7.17"
+    "ytdl-core": "^0.8.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
-    "babel-preset-es2015-node": "^6.1.1"
+    "babel-preset-node6": "^11.0.0",
+    "cpy-cli": "^1.0.1",
+    "del-cli": "^0.2.1",
+    "jspm": "^0.17.0-beta.38"
   },
   "scripts": {
-    "start": "babel-node demo --presets es2015-node",
-    "build": "babel src --out-dir dist --presets es2015-node",
-    "debug-cli": "npm run build && node ./dist/cli.js -p 8000 -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag -t IcyServer,Manage",
+    "start": "babel-node demo",
+    "debug-cli": "npm run build && node ./dist/cli.js -p 8000 -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag -t IcyServer,Client",
     "debug-cli-win": "npm run build && node ./dist/cli.js -p 8000 -s Memory --youtube-items https://www.youtube.com/watch?v=ytWz0qVvBZ0,https://www.youtube.com/watch?v=D67jM8nO7Ag --ffmpeg-path C:/projects/ffmpeg/bin/ffmpeg.exe",
-    "postinstall": "jspm i --production"
+    "build": "npm run cleanup && npm run build-server && npm run build-client",
+    "build-server": "babel src --out-dir dist/server",
+    "build-client": "npm run build-js && npm run build-html && npm run build-css",
+    "build-js": "jspm build client/js/index.js dist/client/index.js --minify --skip-source-maps",
+    "build-css": "cpy client/css/**/*.css dist/client/css",
+    "build-html": "cpy client/*.html dist/client",
+    "cleanup": "del-cli dist"
   },
   "bin": {
-    "jscast": "./bin/index.js"
+    "jsCast": "./bin/index.js"
   },
   "jspm": {
+    "name": "jscast",
+    "main": "client/js/index.js",
     "dependencies": {
       "events": "github:jspm/nodelibs-events@^0.1.1",
       "jquery": "npm:jquery@^3.1.1",
       "knockout": "github:knockout/knockout@^3.4.1"
     },
     "devDependencies": {
-      "babel": "npm:babel-core@^5.8.24",
-      "babel-runtime": "npm:babel-runtime@^5.8.24",
-      "core-js": "npm:core-js@^1.1.4"
+      "plugin-babel": "npm:systemjs-plugin-babel@^0.0.20"
+    },
+    "peerDependencies": {
+      "assert": "npm:jspm-nodelibs-assert@^0.2.0",
+      "process": "npm:jspm-nodelibs-process@^0.2.0",
+      "util": "npm:jspm-nodelibs-util@^0.2.0"
+    },
+    "overrides": {
+      "github:knockout/knockout@3.4.1": {
+        "main": "dist/knockout.debug",
+        "meta": {
+          "dist/knockout.debug.js": {
+            "exports": "ko",
+            "format": "global"
+          }
+        }
+      },
+      "npm:jquery@3.1.1": {
+        "format": "amd"
+      }
     }
   }
 }

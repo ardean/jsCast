@@ -1,10 +1,5 @@
-import {
-  log
-} from "util";
-import {
-  default as jscast,
-  PluginManager
-} from "../src";
+import { log } from "util";
+import { default as jsCast, PluginManager } from "../src";
 import geoip from "geoip-lite";
 import ip from "ip";
 
@@ -31,8 +26,8 @@ const suicidePlaylist = [
   "https://www.youtube.com/watch?v=7S8t_LfA3y0"
 ].map(mapYouTubeList);
 
-const jscastOptions = {
-  // manageRootPath: "/",
+const jsCastOptions = {
+  // webClientRootPath: "/",
   // icyServerRootPath: "/listen",
   stationOptions: {
     // ffmpegPath: "C:/projects/ffmpeg/bin/ffmpeg.exe",
@@ -44,13 +39,13 @@ const jscastOptions = {
   }
 };
 
-const instance = jscast(jscastOptions)
+const instance = jsCast(jsCastOptions)
   .on("clientRejected", (client) => {
     log(`client ${client.ip} rejected`);
   });
 
 const icyServer = instance.pluginManager.getActiveType("IcyServer");
-const manage = instance.pluginManager.getActiveType("Manage");
+const webClient = instance.pluginManager.getActiveType("WebClient");
 
 instance
   .station
@@ -66,11 +61,9 @@ instance
   });
 
 instance
-  .start({
-    port: 8000
-  })
+  .start({ port: 8000 })
   .then(() => {
-    log(`jscast is running`);
+    log(`jsCast is running`);
 
     if (icyServer) {
       icyServer
@@ -84,8 +77,8 @@ instance
       log(`listen on http://localhost:${icyServer.port}${icyServer.rootPath}`);
     }
 
-    if (manage) {
-      log(`manage on http://localhost:${manage.port}${manage.rootPath}`);
+    if (webClient) {
+      log(`Web Client on http://localhost:${webClient.port}${webClient.rootPath}`);
     }
   })
   .catch((err) => {

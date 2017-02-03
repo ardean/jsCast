@@ -1,9 +1,5 @@
-import {
-  EventEmitter
-} from "events";
-import {
-  Server as HttpServer
-} from "http";
+import { EventEmitter } from "events";
+import { Server as HttpServer } from "http";
 import express from "express";
 import Stream from "./stream";
 import Station from "./station";
@@ -13,7 +9,7 @@ import Playlist from "./playlist";
 import Item from "./item";
 import clientMiddleware from "./client/client-middleware";
 import allowMiddleware from "./client/client-allow-middleware";
-import pkg from "../package";
+import { version } from "./package";
 
 class JsCast extends EventEmitter {
   constructor(options) {
@@ -43,7 +39,7 @@ class JsCast extends EventEmitter {
 
     // TODO: universal (client) middlewares
     this.app.use((req, res, next) => {
-      res.setHeader("x-powered-by", `jscast v${pkg.version} https://github.com/BigTeri/jscast`);
+      res.setHeader("x-powered-by", `jsCast v${version} https://github.com/ardean/jsCast`);
       next();
     });
     this.app.use(clientMiddleware);
@@ -92,12 +88,12 @@ class JsCast extends EventEmitter {
   }
 }
 
-function jscast(options) {
+function jsCast(options) {
   return new JsCast(options);
 }
 
 export {
-  jscast,
+  jsCast,
   JsCast,
   Stream,
   Station,
@@ -107,4 +103,4 @@ export {
   Item
 };
 
-export default jscast;
+export default jsCast;

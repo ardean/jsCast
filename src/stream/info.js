@@ -1,9 +1,5 @@
-import {
-  EventEmitter
-} from "events";
-import {
-  MP3 as Mp3Parser
-} from "sm-parsers";
+import { EventEmitter } from "events";
+import { MP3 as Mp3Parser } from "sm-parsers";
 import destroy from "destroy";
 
 export default class StreamInfo extends EventEmitter {

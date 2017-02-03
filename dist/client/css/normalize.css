@@ -1,0 +1,13 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+}
+
+input[type="url"] {
+  outline: 0;
+  border: 1px solid #000;
+}

@@ -1,19 +1,17 @@
-import {
-  log
-} from "util";
 import ip from "ip";
+import jsCast from "./";
+import { log } from "util";
 import geoip from "geoip-lite";
-import program from "commander";
-import pkg from "../package";
-import jscast from "./";
 import Storage from "./storage";
+import program from "commander";
+import { version } from "./package";
 import PluginManager from "./plugins";
 
 const allStorageTypeNames = Storage.getTypeNames();
 const allPluginTypeNames = PluginManager.getTypeNames();
 
 program
-  .version(pkg.version)
+  .version(version)
   .option("-p, --port [port]", "sets server port", parseInt)
   .option("-s, --storage-type [storageType]", "use storage type, built-in types: " + allStorageTypeNames.join(", "))
   .option("-t, --plugin-types [pluginTypes]", "use plugin types, built-in types: " + allPluginTypeNames.join(", "), parseList)
@@ -32,7 +30,7 @@ if (playlist.length) {
   playlists.push(playlist);
 }
 
-const jscastOptions = {
+const jsCastOptions = {
   stationOptions: {
     storageType: program.storageType,
     ffmpegPath: program.ffmpegPath,
@@ -43,13 +41,13 @@ const jscastOptions = {
   }
 };
 
-const instance = jscast(jscastOptions)
+const instance = jsCast(jsCastOptions)
   .on("clientRejected", (client) => {
     log(`client ${client.ip} rejected`);
   });
 
 const icyServer = instance.pluginManager.getActiveType("IcyServer");
-const manage = instance.pluginManager.getActiveType("Manage");
+const webClient = instance.pluginManager.getActiveType("WebClient");
 
 instance
   .station
@@ -79,7 +77,7 @@ instance
     }
   })
   .then(() => {
-    log(`jscast is running`);
+    log(`jsCast is running`);
 
     if (icyServer) {
       icyServer
@@ -93,8 +91,8 @@ instance
       log(`listen on http://localhost:${icyServer.port}${icyServer.rootPath}`);
     }
 
-    if (manage) {
-      log(`manage on http://localhost:${manage.port}${manage.rootPath}`);
+    if (webClient) {
+      log(`Web Client on http://localhost:${webClient.port}${webClient.rootPath}`);
     }
   })
   .catch((err) => {

@@ -1,4 +1,4 @@
-# jscast
+# jsCast
 
 [![NPM Version][npm-image]][downloads-url] [![NPM Downloads][downloads-image]][downloads-url]
 
@@ -10,13 +10,13 @@
 - _CLI support_
   - _whitelist / blacklist_
 
-![jscast - manage](/docs/images/jscast-manage.png)
+![jsCast - Web](docs/images/jsCast-Web.png)
 
 ## Quick Start
 
 ### Using CLI
 
-Install jscast globally:
+Install jsCast globally:
 
 ```sh
 $ npm i -g jscast
@@ -25,7 +25,7 @@ $ npm i -g jscast
 Use the new command to start an instance:
 
 ```sh
-$ jscast
+$ jsCast
 ```
 
 - override default port: `-p PORT` / `--port PORT`
@@ -39,21 +39,17 @@ $ jscast
 ### Using Script
 
 ```javascript
-import jscast from "jscast";
-import {
-  log
-} from "util";
+import jsCast from "jscast";
+import { log } from "util";
 
-const instance = jscast()
-  .on("clientRejected", (client) => {
-    log(`client ${client.ip} rejected`);
-  });
+const instance = jsCast().on("clientRejected", (client) => {
+  log(`client ${client.ip} rejected`);
+});
 
 const icyServer = instance.pluginManager.getActiveType("IcyServer");
-const manage = instance.pluginManager.getActiveType("Manage");
+const webClient = instance.pluginManager.getActiveType("WebClient");
 
-instance
-  .station
+instance.station
   .on("play", (item, metadata) => {
     log(`playing ${metadata.options.StreamTitle}`);
   })
@@ -87,8 +83,8 @@ instance
       log(`listen on http://localhost:${icyServer.port}${icyServer.rootPath}`);
     }
 
-    if (manage) {
-      log(`manage on http://localhost:${manage.port}${manage.rootPath} your playlists and items`);
+    if (webClient) {
+      log(`Web Client on http://localhost:${webClient.port}${webClient.rootPath} your playlists and items`);
     }
   })
   .catch((err) => console.error(err));
@@ -111,17 +107,17 @@ $ npm install jscast
 Play around and contribute to the project:
 
 ```sh
-$ git clone https://github.com/BigTeri/jscast
-$ cd jscast
+$ git clone https://github.com/ardean/jsCast
+$ cd jsCast
 $ npm i
 $ npm start
 ```
 
 ## Plugin Types
 
-### Manage
+### Web Client
 
-**Manage** is a `webapp` to control jscast playlists and items. the route is `/manage` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with `manage`. There is also a `player` (using a audio tag) embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
+**Web Client** is a `webapp` to control jsCast playlists and items. the route is `/web` by default. At the moment there is just a `YouTube` type implemented but the idea is to `control` everything with this `webapp`. There is also a `player` (using a audio tag) embedded to `play` the `SHOUTcast output`, however for me this worked only with a `Desktop-Browser`. god knows why...
 
 ### IcyServer
 
@@ -158,17 +154,12 @@ If thats not enough, you can create [your own one](#custom-storages)
 
 ### Custom Items
 
-jscast has playlists with [typed items](#item-types). You can easily add your own item type:
+jsCast has playlists with [typed items](#item-types). You can easily add your own item type:
 
 ```javascript
 import fs from "fs";
-import {
-  default as jscast,
-  Item
-} from "jscast";
-import {
-  log
-} from "util";
+import { default as jsCast, Item } from "jscast";
+import { log } from "util";
 
 class MyItemType {
   constructor() {
@@ -192,7 +183,7 @@ class MyItemType {
 
 Item.registerType("MyItem", new MyItemType());
 
-jscast({
+jsCast({
   stationOptions: {
     storageType: "Memory",
     playlists: [{
@@ -229,10 +220,7 @@ jscast({
 You can use the built-in [storage types](#storage-types) or create your own one:
 
 ```javascript
-import {
-  default as jscast,
-  Storage
-} from "jscast";
+import { default as jsCast, Storage } from "jscast";
 
 class MyStorageType {
   constructor() {
@@ -272,7 +260,7 @@ class MyStorageType {
 
 Storage.registerType("MyStorage", new MyStorageType());
 
-jscast({
+jsCast({
   stationOptions: {
     storageType: "MyStorage"
   }

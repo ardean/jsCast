@@ -1,6 +1,4 @@
-import {
-  EventEmitter
-} from "events";
+import { EventEmitter } from "events";
 import ffmpeg from "fluent-ffmpeg";
 import Stream from "../stream";
 import Storage from "../storage";
